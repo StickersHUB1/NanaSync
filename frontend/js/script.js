@@ -1,5 +1,8 @@
 console.log('Iniciando script.js');
 
+const API_URL = 'https://nanasyncbackend.onrender.com';
+console.log('API_URL configurada como:', API_URL);
+
 // Función para mostrar notificaciones
 function showNotification(message, type = 'error') {
   console.log('Mostrando notificación:', message, 'Tipo:', type);
@@ -18,8 +21,6 @@ function showNotification(message, type = 'error') {
 }
 
 // Función para cargar páginas dinámicamente
-const API_URL = 'https://nanasyncbackend.onrender.com';
-console.log('API_URL configurada como:', API_URL);
 async function loadPage(page) {
   console.log('Cargando página:', page);
   const main = document.querySelector('main');
@@ -34,32 +35,48 @@ async function loadPage(page) {
     main.style.opacity = '0';
     const response = await fetch(`${page}.html`);
     if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-    main.innerHTML = await response.text();
+    const html = await response.text();
+    main.innerHTML = html;
     main.style.opacity = '1';
     console.log('Página cargada exitosamente:', page);
 
-    // Cargar scripts específicos
-    if (page === 'fichaje') {
-      console.log('Cargando fichaje.js');
-      const script = document.createElement('script');
-      script.src = 'frontend/js/fichaje.js';
-      document.body.appendChild(script);
-    } else if (page === 'insight_track') {
-      console.log('Cargando insight_track.js');
-      const script = document.createElement('script');
-      script.src = 'frontend/js/insight_track.js';
-      document.body.appendChild(script);
-    } else if (page === 'inicio') {
-      console.log('Cargando inicio.js (si existe)');
-      // Añadir inicio.js si lo creas
+    const empleado = getActiveEmployee();
+
+    // Bloqueo si no hay sesión
+    if (!empleado && (page === 'inicio' || page === 'insight_track')) {
+      console.warn('Acceso denegado por falta de sesión');
+      main.innerHTML = `
+        <div class="access-denied">
+          <h2>🚫 Acceso restringido</h2>
+          <p>Debes iniciar sesión para acceder a esta sección.</p>
+        </div>`;
+      return;
     }
 
-    // Verificar sesión para Inicio e Insight Track
-    const empleado = getActiveEmployee();
-    if (!empleado && (page === 'inicio' || page === 'insight_track')) {
-      console.log('Acceso denegado sin sesión a:', page);
-      main.innerHTML = '<div class="access-denied"><h2>🚫 Acceso restringido</h2><p>Debes iniciar sesión para acceder a esta sección.</p></div>';
+    // Bloqueo si no es admin
+    if (page === 'insight_track' && empleado?.rol !== 'admin') {
+      console.warn('Acceso denegado para no-admin a Insight Track');
+      main.innerHTML = `
+        <div class="access-denied">
+          <h2>🚫 Solo administradores</h2>
+          <p>No tienes permisos para acceder a Insight Track.</p>
+        </div>`;
+      return;
     }
+
+    // Cargar script correspondiente
+    let scriptSrc = '';
+    if (page === 'fichaje') scriptSrc = 'frontend/js/fichaje.js';
+    else if (page === 'insight_track') scriptSrc = 'frontend/js/insight_track.js';
+    else if (page === 'inicio') scriptSrc = 'frontend/js/inicio.js';
+
+    if (scriptSrc) {
+      const script = document.createElement('script');
+      script.src = scriptSrc;
+      script.onload = () => console.log(`${scriptSrc} cargado`);
+      document.body.appendChild(script);
+    }
+
   } catch (error) {
     console.error('Error al cargar página:', error);
     main.innerHTML = '<p>Error al cargar la página. Intenta de nuevo.</p>';
@@ -67,7 +84,7 @@ async function loadPage(page) {
   }
 }
 
-// Navegación basada en el sidebar
+// Navegación desde el sidebar
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM completamente cargado');
   const links = document.querySelectorAll('.sidebar a');
@@ -79,19 +96,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   links.forEach(link => {
     link.addEventListener('click', (e) => {
-      console.log('Click en enlace:', link.href);
       e.preventDefault();
       const page = link.getAttribute('href');
       if (page) loadPage(page);
     });
   });
 
-  // Cargar fichaje.html por defecto para login
+  // Cargar por defecto fichaje
   console.log('Cargando página inicial: fichaje');
   loadPage('fichaje');
 });
 
-// Funciones auxiliares
+// Funciones auxiliares globales
 function getActiveEmployee() {
   const empleado = JSON.parse(localStorage.getItem('empleadoActivo')) || null;
   console.log('Empleado activo:', empleado);
@@ -99,7 +115,7 @@ function getActiveEmployee() {
 }
 
 function isAdmin() {
-  const admin = getActiveEmployee() && getActiveEmployee().rol === 'admin';
+  const admin = getActiveEmployee()?.rol === 'admin';
   console.log('¿Es admin?', admin);
   return admin;
 }
