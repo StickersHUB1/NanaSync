@@ -1,41 +1,90 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NanaSync - Fichar</title>
-  <link rel="stylesheet" href="frontend/css/styles.css">
-</head>
-<body>
-  <header>
-    <h1>NanaSync - Fichar Entrada/Salida</h1>
-  </header>
-  <main>
-    <form id="login-form">
-      <label for="employeeId">ID del Empleado:</label>
-      <input type="text" id="employeeId" required>
-      <label for="password">Contraseña:</label>
-      <input type="password" id="password" required>
-      <button type="submit" id="checkin-btn">🕒 Fichar Entrada</button>
-    </form>
-    <div id="profile" class="profile">
-      <h2>Perfil</h2>
-      <p><strong>Nombre:</strong> <span id="emp-name"></span></p>
-      <p><strong>Rol:</strong> <span id="emp-role"></span></p>
-      <p><strong>Horario:</strong> <span id="emp-hours"></span></p>
-      <button onclick="terminarTurno()">Terminar Turno</button>
-    </div>
-    <div id="modal" class="modal">
-      <div class="modal-content">
-        <span class="close" onclick="closeModal('modal')">&times;</span>
-        <h2>Confirmar salida</h2>
-        <p>¿Estás seguro de que quieres terminar tu turno?</p>
-        <button onclick="confirmarTerminar()">Sí</button>
-        <button onclick="closeModal('modal')">No</button>
-      </div>
-    </div>
-    <div id="notification" class="notification"></div>
-  </main>
-  <script src="frontend/js/fichaje.js"></script>
-</body>
-</html>
+const API_URL = 'https://nanasyncbackend.onrender.com';
+
+async function login(id, password) {
+  try {
+    const res = await fetch(`${API_URL}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, password })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      localStorage.setItem('empleadoActivo', JSON.stringify(data));
+      return data;
+    } else {
+      showNotification(data.error || 'Credenciales incorrectas');
+      return null;
+    }
+  } catch (err) {
+    showNotification('Error de conexión con el servidor');
+    console.error(err);
+    return null;
+  }
+}
+
+function mostrarPerfil(empleado) {
+  const profile = document.getElementById('profile');
+  const form = document.getElementById('login-form');
+  if (!profile || !form) return;
+  form.style.display = 'none';
+  profile.style.display = 'block';
+
+  document.getElementById('emp-name').textContent = empleado.nombre;
+  document.getElementById('emp-role').textContent = `${empleado.puesto} (${empleado.rol})`;
+  document.getElementById('emp-hours').textContent = `Horario: ${empleado.horario}`;
+}
+
+function terminarTurno() {
+  openModal('modal');
+}
+
+async function confirmarTerminar() {
+  const empleado = getActiveEmployee();
+  if (empleado) {
+    try {
+      await fetch(`${API_URL}/api/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: empleado.id })
+      });
+      logout();
+    } catch (err) {
+      showNotification('Error al cerrar sesión');
+    }
+  }
+}
+
+function logout() {
+  localStorage.removeItem('empleadoActivo');
+  const profile = document.getElementById('profile');
+  const form = document.getElementById('login-form');
+  if (profile && form) {
+    profile.style.display = 'none';
+    form.style.display = 'block';
+  }
+  showNotification('Sesión cerrada', 'success');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('login-form');
+  const checkinBtn = document.getElementById('checkin-btn');
+  if (form && checkinBtn) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      checkinBtn.disabled = true;
+      checkinBtn.textContent = 'Cargando...';
+
+      const id = document.getElementById('employeeId').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      const empleado = await login(id, password);
+      if (empleado) mostrarPerfil(empleado);
+
+      checkinBtn.disabled = false;
+      checkinBtn.textContent = '🕒 Fichar Entrada';
+    });
+  }
+
+  const activo = getActiveEmployee();
+  if (activo) mostrarPerfil(activo);
+});
