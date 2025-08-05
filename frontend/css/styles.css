@@ -4,6 +4,8 @@ body {
   margin: 0;
   padding: 0;
   background-color: #f4f4f4;
+  display: flex;
+  height: 100vh;
 }
 
 header {
@@ -11,14 +13,45 @@ header {
   color: white;
   padding: 10px 20px;
   text-align: center;
+  width: 100%;
 }
 
-header h1 {
-  margin: 0;
+.sidebar {
+  width: 250px;
+  background-color: #333;
+  color: white;
+  padding: 20px;
+  height: 100%;
+  position: fixed;
+  top: 60px; /* Debajo del header */
+  left: 0;
+  overflow-y: auto;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  margin: 20px 0;
+}
+
+.sidebar ul li a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.sidebar ul li a:hover {
+  color: #ddd;
 }
 
 main {
+  margin-left: 250px; /* Espacio para el sidebar */
   padding: 20px;
+  flex-grow: 1;
+  overflow-y: auto;
 }
 
 form {
