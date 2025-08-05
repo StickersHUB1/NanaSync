@@ -1,10 +1,10 @@
 <h1 class="page-title">Insight Track</h1>
 
 <div class="tab-buttons">
-  <button class="tab-btn active" onclick="switchTab('actividad')">Actividad</button>
-  <button class="tab-btn" onclick="switchTab('monitorizacion')">Monitorización</button>
-  <button class="tab-btn" onclick="switchTab('panel')">Panel</button>
-  <button class="tab-btn" onclick="switchTab('vincular')">Vincular</button>
+  <button class="tab-btn active" data-tab="actividad">Actividad</button>
+  <button class="tab-btn" data-tab="monitorizacion">Monitorización</button>
+  <button class="tab-btn" data-tab="panel">Panel</button>
+  <button class="tab-btn" data-tab="vincular">Vincular</button>
 </div>
 
 <section id="actividad-panel" class="tab-panel visible">
@@ -27,10 +27,14 @@
 
 <section id="vincular-panel" class="tab-panel">
   <h2>Vincular Dispositivo</h2>
-  <p>Aquí podrás generar un token para vincular un dispositivo con un empleado.</p>
-  <div id="vincular-content">
-    <!-- Formulario o lógica de vinculación -->
-  </div>
+  <form id="vincular-form">
+    <label for="employeeId">ID de Empleado:</label>
+    <input type="text" id="employeeId" required />
+    <label for="deviceName">Nombre del Dispositivo:</label>
+    <input type="text" id="deviceName" required />
+    <button type="submit">Vincular</button>
+  </form>
+  <div id="vincular-content"></div>
 </section>
 
 <div id="modal" class="modal-overlay" style="display: none;">
@@ -38,6 +42,6 @@
     <h3 id="modal-title">Empleado</h3>
     <p id="modal-description">Selecciona una acción:</p>
     <button class="modal-action" onclick="accionSolicitarMonitorizacion()">🛱 Solicitar Monitorización</button>
-    <button onclick="cerrarModal()">Cancelar</button>
+    <button onclick="closeModal('modal')">Cancelar</button>
   </div>
 </div>
