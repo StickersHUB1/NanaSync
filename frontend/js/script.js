@@ -1,56 +1,97 @@
-function loadPage(url) {
-  fetch(url)
-    .then(res => {
-      if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-      return res.text();
-    })
-    .then(html => {
-      document.getElementById('main-content').innerHTML = html;
+// Mapa de scripts asociados a cada página
+const pageScripts = {
+  'dashboard.html': 'frontend/js/dashboard.js',
+  'fichaje.html': 'frontend/js/fichaje.js',
+  'insight_track.html': 'frontend/js/insight_track.js'
+};
 
-      // Cargar el JS específico si es necesario
-      const script = document.createElement('script');
-      script.defer = true;
+// Caché para evitar recargas innecesarias
+let currentPage = null;
+let currentScript = null;
 
-      if (url.includes('dashboard')) {
-        script.src = 'frontend/js/dashboard.js';
-        document.body.appendChild(script);
-      }
-
-      if (url.includes('fichaje')) {
-        script.src = 'frontend/js/fichaje.js';
-        document.body.appendChild(script);
-      }
-
-      if (url.includes('insight_track')) {
-        script.src = 'frontend/js/insight_track.js';
-        document.body.appendChild(script);
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      document.getElementById('main-content').innerHTML = `
-        <h2>Error</h2>
-        <p>No se pudo cargar <code>${url}</code>.</p>
-      `;
-    });
+// Función para mostrar notificaciones
+function showNotification(message, type = 'error') {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.className = `notification ${type}`;
+  notification.style.display = 'block';
+  setTimeout(() => {
+    notification.style.display = 'none';
+  }, 3000);
 }
 
-// Navegación con protección para Insight Track
-function navegarInsight() {
-  const datos = JSON.parse(localStorage.getItem("empleadoActivo"));
-  if (!datos || datos.rol !== "admin") {
-    document.getElementById("bloqueo-insight").style.display = "flex";
-    return;
+// Cargar página dinámicamente
+async function loadPage(url) {
+  if (currentPage === url) return; // Evitar recarga de la misma página
+  currentPage = url;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+    const html = await res.text();
+    
+    const mainContent = document.getElementById('main-content');
+    mainContent.style.opacity = '0';
+    mainContent.innerHTML = html;
+    
+    // Transición suave
+    setTimeout(() => {
+      mainContent.style.opacity = '1';
+    }, 100);
+
+    // Limpiar script anterior
+    if (currentScript) {
+      currentScript.remove();
+      currentScript = null;
+    }
+
+    // Cargar script asociado
+    if (pageScripts[url]) {
+      currentScript = document.createElement('script');
+      currentScript.src = pageScripts[url];
+      currentScript.defer = true;
+      document.body.appendChild(currentScript);
+    }
+  } catch (err) {
+    console.error(err);
+    showNotification(`No se pudo cargar ${url}.`);
+    document.getElementById('main-content').innerHTML = `
+      <h2>Error</h2>
+      <p>No se pudo cargar <code>${url}</code>.</p>
+    `;
   }
-  loadPage("insight_track.html");
 }
 
-// Cierre del modal de bloqueo
-function cerrarBloqueo() {
-  document.getElementById("bloqueo-insight").style.display = "none";
+// Gestión de navegación
+function setupNavigation() {
+  document.querySelectorAll('.sidebar a, .insight-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const page = link.getAttribute('data-page');
+      if (link.classList.contains('insight-link') && !isAdmin()) {
+        openModal('bloqueo-insight');
+        return;
+      }
+      loadPage(page);
+    });
+  });
 }
 
-// Al iniciar, cargar el dashboard por defecto
-window.addEventListener("DOMContentLoaded", () => {
-  loadPage("dashboard.html");
+// Gestión de modales
+function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  modal.style.display = 'flex';
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal(modalId);
+  });
+}
+
+function closeModal(modalId) {
+  document.getElementById(modalId).style.display = 'none';
+}
+
+// Inicialización
+window.addEventListener('DOMContentLoaded', () => {
+  setupNavigation();
+  loadPage('dashboard.html');
 });
