@@ -19,3 +19,11 @@ if (url.includes('insight_track')) {
 window.addEventListener('DOMContentLoaded', () => {
   loadPage('partials/dashboard.html');
 });
+
+if (url.includes('checkin.html')) {
+  const script = document.createElement('script');
+  script.src = 'frontend/js/checkin.js';
+  script.defer = true;
+  document.body.appendChild(script);
+}
+
