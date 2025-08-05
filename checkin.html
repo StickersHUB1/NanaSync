@@ -1,0 +1,28 @@
+<h1 class="page-title">Fichaje de Empleado</h1>
+
+<div class="checkin-container">
+  <form id="checkin-form">
+    <label for="employeeId">Número de Empleado:</label>
+    <input type="text" id="employeeId" required />
+
+    <label for="password">Contraseña:</label>
+    <input type="password" id="password" required />
+
+    <button type="submit">🕒 Fichar Entrada</button>
+  </form>
+
+  <div id="profile" style="display: none;">
+    <h2 id="emp-name"></h2>
+    <p id="emp-role"></p>
+    <p id="emp-hours"></p>
+    <button onclick="terminarTurno()">🚪 Terminar Turno</button>
+  </div>
+
+  <div id="modal" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+      <h3>¿Seguro que deseas terminar el turno?</h3>
+      <button class="modal-action" onclick="confirmarTerminar()">✅ Confirmar</button>
+      <button onclick="cerrarModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
