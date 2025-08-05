@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Funciones auxiliares (reutilizadas desde script.js)
+// Funciones auxiliares
 function getActiveEmployee() {
   const empleado = JSON.parse(localStorage.getItem('empleadoActivo')) || null;
   console.log('Empleado activo:', empleado);
