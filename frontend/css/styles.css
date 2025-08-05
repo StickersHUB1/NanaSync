@@ -153,3 +153,31 @@ main#main-content {
   50% { opacity: 0.3; }
   100% { opacity: 1; }
 }
+
+.checkin-container {
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+#checkin-form input {
+  display: block;
+  margin: 10px auto;
+  padding: 10px;
+  width: 90%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+#checkin-form button {
+  padding: 10px 20px;
+  background-color: #202840;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#checkin-form button:hover {
+  background-color: #394b7d;
+}
