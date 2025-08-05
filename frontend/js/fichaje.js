@@ -1,10 +1,8 @@
-const form = document.getElementById('checkin-form');
-const profile = document.getElementById('profile');
-const checkinBtn = document.getElementById('checkin-btn');
+const API_URL = 'https://nanasyncbackend.onrender.com';
 
 async function login(id, password) {
   try {
-    const res = await fetch('/api/login', {
+    const res = await fetch(`${API_URL}/api/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, password })
@@ -19,6 +17,7 @@ async function login(id, password) {
     }
   } catch (err) {
     showNotification('Error de conexión con el servidor');
+    console.error(err);
     return null;
   }
 }
@@ -37,8 +36,20 @@ function terminarTurno() {
   openModal('modal');
 }
 
-function confirmarTerminar() {
-  logout();
+async function confirmarTerminar() {
+  const empleado = getActiveEmployee();
+  if (empleado) {
+    try {
+      await fetch(`${API_URL}/api/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: empleado.id })
+      });
+      logout();
+    } catch (err) {
+      showNotification('Error al cerrar sesión');
+    }
+  }
 }
 
 form?.addEventListener('submit', async (e) => {
