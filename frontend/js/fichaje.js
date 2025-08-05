@@ -1,3 +1,4 @@
+// Empleados registrados (puedes expandir desde backend en futuro)
 const empleados = [
   {
     id: "1001",
@@ -17,9 +18,9 @@ const empleados = [
   },
   {
     id: "admin01",
-    password: "admin777",
-    nombre: "Alan Supervisor",
-    puesto: "Supervisor General",
+    password: "admintrack",
+    nombre: "Laura Moreno",
+    puesto: "Jefa de Operaciones",
     horario: "08:00 – 16:00",
     rol: "admin"
   }
@@ -29,7 +30,7 @@ const form = document.getElementById("checkin-form");
 const profile = document.getElementById("profile");
 const modal = document.getElementById("modal");
 
-form.addEventListener("submit", e => {
+form?.addEventListener("submit", e => {
   e.preventDefault();
 
   const id = document.getElementById("employeeId").value.trim();
@@ -46,10 +47,11 @@ form.addEventListener("submit", e => {
 });
 
 function mostrarPerfil(empleado) {
-  form.style.display = "none";
+  if (form) form.style.display = "none";
   profile.style.display = "block";
+
   document.getElementById("emp-name").innerText = empleado.nombre;
-  document.getElementById("emp-role").innerText = `${empleado.puesto} (${empleado.rol})`;
+  document.getElementById("emp-role").innerText = `Rol: ${empleado.rol} - Puesto: ${empleado.puesto}`;
   document.getElementById("emp-hours").innerText = `Horario: ${empleado.horario}`;
 }
 
@@ -66,10 +68,11 @@ function confirmarTerminar() {
   location.reload();
 }
 
-// Si ya está fichado, cargar perfil directo
+// Mostrar perfil directamente si ya está fichado
 window.addEventListener("DOMContentLoaded", () => {
   const activo = localStorage.getItem("empleadoActivo");
   if (activo) {
-    mostrarPerfil(JSON.parse(activo));
+    const empleado = JSON.parse(activo);
+    mostrarPerfil(empleado);
   }
 });
