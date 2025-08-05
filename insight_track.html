@@ -1,7 +1,6 @@
 <div class="tabs">
   <button class="tab-btn active" data-tab="actividad">Actividad</button>
   <button class="tab-btn" data-tab="monitorizacion">Monitorización</button>
-  <button class="tab-btn" data-tab="vincular">Vincular</button>
 </div>
 <div id="actividad-panel" class="tab-panel visible">
   <h2>Actividad</h2>
@@ -11,22 +10,12 @@
   <h2>Monitorización</h2>
   <div id="monitorizacion-grid"></div>
 </div>
-<div id="vincular-panel" class="tab-panel">
-  <h2>Vincular Dispositivo</h2>
-  <form id="vincular-form">
-    <label for="employeeId">ID del Empleado:</label>
-    <input type="text" id="employeeId" required>
-    <label for="deviceName">Nombre del Dispositivo:</label>
-    <input type="text" id="deviceName" required>
-    <button type="submit">Vincular</button>
-  </form>
-</div>
 <div id="modal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal('modal')">&times;</span>
     <h2 id="modal-title"></h2>
     <p>¿Solicitar monitorización?</p>
-    <button onclick="accionSolicitarMonitorizacion()">Sí</button>
+    <button onclick="solicitarMonitorizacion()">Sí</button>
     <button onclick="closeModal('modal')">No</button>
   </div>
 </div>
