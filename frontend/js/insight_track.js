@@ -4,62 +4,52 @@ const API_URL = 'https://nanasyncbackend.onrender.com';
 let empleados = [];
 let empleadoSeleccionado = null;
 
+// 🔄 1. Obtener lista de empleados desde la API o mock si falla
 async function fetchEmpleados() {
-  console.log('Buscando empleados desde API');
+  console.log('Buscando empleados desde API...');
   try {
     const res = await fetch(`${API_URL}/api/empleados`);
     if (res.ok) {
       empleados = await res.json();
-      console.log('Empleados obtenidos:', empleados);
+      console.log('Empleados obtenidos desde API:', empleados);
     } else {
-      empleados = [
-        { id: '1001', nombre: 'Lidia González', puesto: 'Atención al Cliente', horario: '09:00 – 17:00', rol: 'empleado', estado: 'inactivo', vinculado: false },
-        { id: 'admin01', nombre: 'Sandra Morales', puesto: 'Jefe de Operaciones', horario: '08:00 – 16:00', rol: 'admin', estado: 'inactivo', vinculado: false }
-      ];
-      console.warn('Usando datos temporales por fallo en la API');
+      console.warn('API no respondió correctamente. Usando datos mock.');
+      usarDatosMock();
     }
   } catch (err) {
-    console.error('Error fetching empleados:', err);
-    empleados = [
-      { id: '1001', nombre: 'Lidia González', puesto: 'Atención al Cliente', horario: '09:00 – 17:00', rol: 'empleado', estado: 'inactivo', vinculado: false },
-      { id: 'admin01', nombre: 'Sandra Morales', puesto: 'Jefe de Operaciones', horario: '08:00 – 16:00', rol: 'admin', estado: 'inactivo', vinculado: false }
-    ];
+    console.error('Error en fetchEmpleados():', err.message);
+    usarDatosMock();
   }
 }
 
+function usarDatosMock() {
+  empleados = [
+    { id: '1001', nombre: 'Lidia González', puesto: 'Atención al Cliente', horario: '09:00 – 17:00', rol: 'empleado', estado: 'inactivo', vinculado: false },
+    { id: 'admin01', nombre: 'Sandra Morales', puesto: 'Jefe de Operaciones', horario: '08:00 – 16:00', rol: 'admin', estado: 'inactivo', vinculado: false }
+  ];
+}
+
+// ⏰ 2. Utilidades de horario y estado visual
 function horaDentroDeRango(rango) {
   const [start, end] = rango.split('–').map(h => parseInt(h.trim().split(':')[0]));
   const ahora = new Date().getHours();
-  console.log('Hora actual:', ahora, 'Rango:', rango, 'Dentro:', ahora >= start && ahora < end);
   return ahora >= start && ahora < end;
 }
 
 function estadoColor(empleado) {
   const ahora = new Date();
-  const [start, end] = empleado.horario.split('–').map(h => {
-    const [hours] = h.trim().split(':');
-    return parseInt(hours);
-  });
+  const [start, end] = empleado.horario.split('–').map(h => parseInt(h.trim().split(':')[0]));
   const horaFin = end;
   const loggedIn = empleado.estado === 'activo';
   const fueraHorario = ahora.getHours() >= horaFin;
 
-  if (loggedIn) {
-    console.log('Estado:', empleado.nombre, 'Verde (logueado)');
-    return 'dot-green';
-  } else if (!loggedIn && horaDentroDeRango(empleado.horario)) {
-    console.log('Estado:', empleado.nombre, 'Rojo parpadeando (debe estar logueado)');
-    return 'dot-red parpadeo';
-  } else if (!loggedIn) {
-    console.log('Estado:', empleado.nombre, 'Rojo (no logueado)');
-    return 'dot-red';
-  } else if (fueraHorario && !loggedIn) {
-    console.log('Estado:', empleado.nombre, 'Rojo/Verde alternando (olvidó logout)');
-    return 'dot-blink'; // Estilo personalizado para alternar
-  }
+  if (loggedIn) return 'dot-green';
+  if (!loggedIn && horaDentroDeRango(empleado.horario)) return 'dot-red parpadeo';
+  if (!loggedIn && fueraHorario) return 'dot-blink';
   return 'dot-red';
 }
 
+// 🧱 3. Crear tarjeta visual para cada empleado
 function crearTarjeta(empleado, esInteractivo = false) {
   const card = document.createElement('div');
   card.className = 'card';
@@ -90,32 +80,26 @@ function crearTarjeta(empleado, esInteractivo = false) {
   return card;
 }
 
+// 📋 4. Renderizar panel de Actividad
 function cargarActividad() {
-  console.log('Cargando actividad');
   const grid = document.getElementById('actividad-grid');
-  if (!grid) {
-    console.error('Grid de actividad no encontrado');
-    return;
-  }
+  if (!grid) return console.error('Grid de actividad no encontrado');
   grid.innerHTML = '';
   empleados.forEach(emp => grid.appendChild(crearTarjeta(emp)));
 }
 
+// 👁️ 5. Renderizar panel de Monitorización
 function cargarMonitorizacion() {
-  console.log('Cargando monitorización');
   const grid = document.getElementById('monitorizacion-grid');
-  if (!grid) {
-    console.error('Grid de monitorización no encontrado');
-    return;
-  }
+  if (!grid) return console.error('Grid de monitorización no encontrado');
   grid.innerHTML = '';
   const logueados = empleados.filter(emp => emp.estado === 'activo');
-  console.log('Empleados logueados:', logueados);
   logueados.forEach(emp => grid.appendChild(crearTarjeta(emp, true)));
 }
 
+// 🔄 6. Cambiar entre pestañas
 function switchTab(tab) {
-  console.log('Cambiando a pestaña:', tab);
+  console.log('➡️ Cambiando a pestaña:', tab);
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('visible'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
 
@@ -129,36 +113,38 @@ function switchTab(tab) {
   if (tab === 'monitorizacion') cargarMonitorizacion();
 }
 
+// 📡 7. Solicitar monitorización (placeholder)
 function solicitarMonitorizacion() {
-  console.log('Solicitando monitorización para:', empleadoSeleccionado?.nombre);
   if (empleadoSeleccionado) {
     showNotification(`Monitorización solicitada para ${empleadoSeleccionado.nombre}`, 'success');
   }
   closeModal('modal');
 }
 
+// 🚀 8. Inicialización
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('DOM de insight_track cargado');
+  console.log('DOM Insight Track listo');
   await fetchEmpleados();
+
+  // Activar listeners de las tabs
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
   });
+
+  // ✅ Forzar inicio en pestaña "actividad"
   switchTab('actividad');
 });
 
-// Funciones auxiliares
+// 🔧 9. Funciones globales heredadas
 function getActiveEmployee() {
   return window.parent.getActiveEmployee();
 }
-
-function showNotification(message, type) {
-  window.parent.showNotification(message, type);
+function showNotification(msg, type) {
+  return window.parent.showNotification(msg, type);
 }
-
 function openModal(modalId) {
-  window.parent.openModal(modalId);
+  return window.parent.openModal(modalId);
 }
-
 function closeModal(modalId) {
-  window.parent.closeModal(modalId);
+  return window.parent.closeModal(modalId);
 }
