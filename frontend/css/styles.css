@@ -1,31 +1,33 @@
 /* Estilos básicos */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Arial', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f4f4f4;
+  background-color: #f0f2f5;
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 header {
-  background-color: #333;
+  background-color: #2c3e50;
   color: white;
-  padding: 10px 20px;
+  padding: 15px 20px;
   text-align: center;
   width: 100%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar {
   width: 250px;
-  background-color: #333;
+  background-color: #34495e;
   color: white;
-  padding: 20px;
-  height: 100%;
+  padding: 20px 10px;
+  height: calc(100vh - 60px); /* Ajuste para el header */
   position: fixed;
-  top: 60px; /* Debajo del header */
+  top: 60px;
   left: 0;
   overflow-y: auto;
+  transition: width 0.3s;
 }
 
 .sidebar ul {
@@ -34,73 +36,83 @@ header {
 }
 
 .sidebar ul li {
-  margin: 20px 0;
+  margin: 15px 0;
 }
 
 .sidebar ul li a {
   color: white;
   text-decoration: none;
   font-size: 16px;
+  padding: 10px;
+  display: block;
+  border-radius: 5px;
 }
 
 .sidebar ul li a:hover {
-  color: #ddd;
+  background-color: #465c71;
+  color: #ecf0f1;
 }
 
 main {
-  margin-left: 250px; /* Espacio para el sidebar */
+  margin-left: 250px;
   padding: 20px;
   flex-grow: 1;
   overflow-y: auto;
+  transition: margin-left 0.3s;
 }
 
 form {
-  max-width: 400px;
+  max-width: 450px;
   margin: 20px auto;
   padding: 20px;
   background-color: white;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 form label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+  font-weight: bold;
 }
 
 form input {
   width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
+  padding: 10px;
+  margin-bottom: 15px;
   box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 button {
-  background-color: #333;
+  background-color: #2c3e50;
   color: white;
-  padding: 10px 20px;
+  padding: 12px 20px;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
+  font-size: 16px;
 }
 
 button:hover {
-  background-color: #555;
+  background-color: #34495e;
 }
 
 #profile {
   display: none;
-  max-width: 400px;
+  max-width: 450px;
   margin: 20px auto;
   padding: 20px;
   background-color: white;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
 #profile p {
   margin: 10px 0;
+  font-size: 16px;
 }
 
 .modal {
@@ -115,25 +127,26 @@ button:hover {
 
 .modal-content {
   background-color: white;
-  margin: 15% auto;
+  margin: 10% auto;
   padding: 20px;
-  border-radius: 5px;
-  width: 70%;
+  border-radius: 8px;
+  width: 80%;
   max-width: 500px;
   text-align: center;
+  position: relative;
 }
 
 .close {
-  color: #aaa;
+  color: #7f8c8d;
   float: right;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: bold;
   cursor: pointer;
 }
 
 .close:hover,
 .close:focus {
-  color: black;
+  color: #2c3e50;
   text-decoration: none;
 }
 
@@ -142,43 +155,50 @@ button:hover {
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 10px 20px;
-  background-color: #333;
+  padding: 12px 20px;
+  background-color: #e74c3c;
   color: white;
-  border-radius: 5px;
+  border-radius: 4px;
   display: none;
   z-index: 1000;
+  font-size: 14px;
 }
 
 .notification.success {
-  background-color: #28a745;
+  background-color: #27ae60;
 }
 
 .card {
   display: inline-block;
-  width: 200px;
+  width: 220px;
   margin: 10px;
-  padding: 10px;
+  padding: 15px;
   background-color: white;
-  border-radius: 5px;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   text-align: center;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
 }
 
 .status-dot {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   display: inline-block;
   margin-right: 10px;
+  vertical-align: middle;
 }
 
 .dot-green {
-  background-color: green;
+  background-color: #27ae60;
 }
 
 .dot-red {
-  background-color: red;
+  background-color: #e74c3c;
 }
 
 .parpadeo {
@@ -190,46 +210,74 @@ button:hover {
 }
 
 .photo {
-  width: 50px;
-  height: 50px;
-  background-color: #ccc;
+  width: 60px;
+  height: 60px;
+  background-color: #ecf0f1;
   border-radius: 50%;
   margin: 0 auto 10px;
 }
 
 .info {
   text-align: left;
+  font-size: 14px;
 }
 
 #actividad-grid, #monitorizacion-grid {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  gap: 15px;
 }
 
 .tab-panel {
   display: none;
+  padding: 20px;
 }
 
 .tab-panel.visible {
   display: block;
 }
 
+.tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
 .tab-btn {
   padding: 10px 20px;
   margin: 0 5px;
-  background-color: #f4f4f4;
+  background-color: #ecf0f1;
   border: none;
+  border-radius: 4px;
   cursor: pointer;
+  font-size: 16px;
 }
 
 .tab-btn.active {
-  background-color: #333;
+  background-color: #2c3e50;
   color: white;
 }
 
 .access-denied {
   text-align: center;
   padding: 20px;
-  color: red;
+  color: #e74c3c;
+  font-size: 18px;
+}
+
+/* Media Query para móviles */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px;
+  }
+  main {
+    margin-left: 200px;
+  }
+  .card {
+    width: 180px;
+  }
+  .modal-content {
+    width: 90%;
+  }
 }
