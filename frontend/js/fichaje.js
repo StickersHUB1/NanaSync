@@ -1,5 +1,5 @@
 (() => {
-  const empleados = [
+  const empleadosData = [
     {
       id: "1001",
       password: "nata123",
@@ -20,52 +20,14 @@
   const profile = document.getElementById("profile");
   const modal = document.getElementById("modal");
 
-  function mostrarPerfil(empleado) {
-    if (!form || !profile) return;
-
-    form.style.display = "none";
-    profile.style.display = "block";
-
-    document.getElementById("emp-name").innerText = empleado.nombre;
-    document.getElementById("emp-role").innerText = empleado.puesto;
-    document.getElementById("emp-hours").innerText = `Horario: ${empleado.horario}`;
-  }
-
-  function terminarTurno() {
-    modal.style.display = "flex";
-  }
-
-  function cerrarModal() {
-    modal.style.display = "none";
-  }
-
-  function confirmarTerminar() {
-    localStorage.removeItem("empleadoActivo");
-    location.reload();
-  }
-
-  // Vincular funciones al DOM
-  window.terminarTurno = terminarTurno;
-  window.cerrarModal = cerrarModal;
-  window.confirmarTerminar = confirmarTerminar;
-
-  // Auto-login si ya está fichado
-  document.addEventListener("DOMContentLoaded", () => {
-    const sesion = localStorage.getItem("empleadoActivo");
-    if (sesion) {
-      const datos = JSON.parse(sesion);
-      mostrarPerfil(datos);
-    }
-  });
-
-  // Si el formulario existe (no perfil activo), activar login
   if (form) {
     form.addEventListener("submit", e => {
       e.preventDefault();
+
       const id = document.getElementById("employeeId").value.trim();
       const password = document.getElementById("password").value.trim();
 
-      const empleado = empleados.find(emp => emp.id === id && emp.password === password);
+      const empleado = empleadosData.find(emp => emp.id === id && emp.password === password);
 
       if (empleado) {
         localStorage.setItem("empleadoActivo", JSON.stringify(empleado));
@@ -75,4 +37,35 @@
       }
     });
   }
+
+  function mostrarPerfil(empleado) {
+    if (form) form.style.display = "none";
+    if (profile) {
+      profile.style.display = "block";
+      document.getElementById("emp-name").innerText = empleado.nombre;
+      document.getElementById("emp-role").innerText = empleado.puesto;
+      document.getElementById("emp-hours").innerText = `Horario: ${empleado.horario}`;
+    }
+  }
+
+  window.terminarTurno = function () {
+    if (modal) modal.style.display = "flex";
+  };
+
+  window.cerrarModal = function () {
+    if (modal) modal.style.display = "none";
+  };
+
+  window.confirmarTerminar = function () {
+    localStorage.removeItem("empleadoActivo");
+    location.reload();
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const activo = localStorage.getItem("empleadoActivo");
+    if (activo) {
+      const emp = JSON.parse(activo);
+      mostrarPerfil(emp);
+    }
+  });
 })();
