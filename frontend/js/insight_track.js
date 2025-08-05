@@ -1,8 +1,28 @@
 const empleados = [
-  { nombre: "Aitana Rodríguez Santos", puesto: "Atención al Cliente", horario: "06:00 – 14:00", estado: "activo" },
-  { nombre: "Javier Torres Mejía", puesto: "Soporte Técnico", horario: "14:00 – 22:00", estado: "inactivo" },
-  { nombre: "Lucía Moreno García", puesto: "Administración", horario: "09:00 – 17:00", estado: "activo" },
-  { nombre: "Pedro Ruiz Cortés", puesto: "Ventas", horario: "10:00 – 18:00", estado: "inactivo" }
+  {
+    nombre: "Aitana Rodríguez Santos",
+    puesto: "Atención al Cliente",
+    horario: "06:00 – 14:00",
+    estado: "activo"
+  },
+  {
+    nombre: "Javier Torres Mejía",
+    puesto: "Soporte Técnico",
+    horario: "14:00 – 22:00",
+    estado: "inactivo"
+  },
+  {
+    nombre: "Lucía Moreno García",
+    puesto: "Administración",
+    horario: "09:00 – 17:00",
+    estado: "activo"
+  },
+  {
+    nombre: "Pedro Ruiz Cortés",
+    puesto: "Ventas",
+    horario: "10:00 – 18:00",
+    estado: "inactivo"
+  }
 ];
 
 function horaDentroDeRango(rango) {
@@ -69,17 +89,12 @@ function cargarMonitorizacion() {
 }
 
 function switchTab(tab) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('visible'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-
-  const targetPanel = document.getElementById(`${tab}-panel`);
-  if (targetPanel) targetPanel.classList.add('visible');
-
-  const btn = [...document.querySelectorAll('.tab-btn')].find(b => b.textContent.toLowerCase().includes(tab));
-  if (btn) btn.classList.add('active');
-
-  if (tab === "actividad") cargarActividad();
-  else if (tab === "monitorizacion") cargarMonitorizacion();
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("visible"));
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById(`${tab}-panel`).classList.add("visible");
+  const btn = [...document.querySelectorAll(".tab-btn")].find(b => b.textContent.toLowerCase().includes(tab));
+  if (btn) btn.classList.add("active");
+  tab === "actividad" ? cargarActividad() : cargarMonitorizacion();
 }
 
 function mostrarModal(emp) {
@@ -98,7 +113,7 @@ function accionSolicitarMonitorizacion() {
   cerrarModal();
 }
 
-// Inicializa al cargar
-document.addEventListener("DOMContentLoaded", () => {
+// Autoejecutar al cargar
+window.addEventListener("DOMContentLoaded", () => {
   switchTab("actividad");
 });
