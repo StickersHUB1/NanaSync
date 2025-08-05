@@ -1,4 +1,3 @@
-// Empleados registrados (puedes expandir desde backend en futuro)
 const empleados = [
   {
     id: "1001",
@@ -9,18 +8,10 @@ const empleados = [
     rol: "empleado"
   },
   {
-    id: "1002",
-    password: "juan456",
-    nombre: "Juan Martínez",
-    puesto: "Ventas",
-    horario: "10:00 – 18:00",
-    rol: "empleado"
-  },
-  {
     id: "admin01",
-    password: "admintrack",
-    nombre: "Laura Moreno",
-    puesto: "Jefa de Operaciones",
+    password: "admin123",
+    nombre: "Sandra Morales",
+    puesto: "Jefe de Operaciones",
     horario: "08:00 – 16:00",
     rol: "admin"
   }
@@ -30,6 +21,7 @@ const form = document.getElementById("checkin-form");
 const profile = document.getElementById("profile");
 const modal = document.getElementById("modal");
 
+// Validación de formulario
 form?.addEventListener("submit", e => {
   e.preventDefault();
 
@@ -46,15 +38,18 @@ form?.addEventListener("submit", e => {
   }
 });
 
+// Mostrar perfil tras login
 function mostrarPerfil(empleado) {
-  if (form) form.style.display = "none";
+  if (!profile || !form) return;
+  form.style.display = "none";
   profile.style.display = "block";
 
   document.getElementById("emp-name").innerText = empleado.nombre;
-  document.getElementById("emp-role").innerText = `Rol: ${empleado.rol} - Puesto: ${empleado.puesto}`;
+  document.getElementById("emp-role").innerText = `${empleado.puesto} (${empleado.rol})`;
   document.getElementById("emp-hours").innerText = `Horario: ${empleado.horario}`;
 }
 
+// Cierre de sesión
 function terminarTurno() {
   modal.style.display = "flex";
 }
@@ -68,7 +63,7 @@ function confirmarTerminar() {
   location.reload();
 }
 
-// Mostrar perfil directamente si ya está fichado
+// Restaurar sesión si ya está fichado
 window.addEventListener("DOMContentLoaded", () => {
   const activo = localStorage.getItem("empleadoActivo");
   if (activo) {
