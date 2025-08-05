@@ -1,43 +1,67 @@
-// ✅ frontend/js/script.js
 function loadPage(url) {
+  // Verificar si el empleado autenticado intenta acceder a Insight Track
+  const sesion = JSON.parse(localStorage.getItem('empleadoActivo'));
+  if (url.includes('insight_track') && sesion) {
+    mostrarAccesoDenegado();
+    return;
+  }
+
   fetch(url)
     .then(res => {
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       return res.text();
     })
     .then(html => {
-      document.getElementById("main-content").innerHTML = html;
+      document.getElementById('main-content').innerHTML = html;
 
-      // Cargar script específico si corresponde
-      if (url.includes("insight_track")) {
-        const script = document.createElement("script");
-        script.src = "frontend/js/insight_track.js";
-        script.defer = true;
-        document.body.appendChild(script);
+      // Eliminar scripts dinámicos previos para evitar duplicados
+      const prevScripts = document.querySelectorAll('script[data-dynamic]');
+      prevScripts.forEach(s => s.remove());
+
+      // Determinar qué script cargar según la vista
+      let scriptPath = '';
+      if (url.includes('insight_track')) {
+        scriptPath = 'frontend/js/insight_track.js';
+      } else if (url.includes('fichaje')) {
+        scriptPath = 'frontend/js/fichaje.js';
+      } else if (url.includes('dashboard')) {
+        scriptPath = 'frontend/js/dashboard.js';
       }
 
-      if (url.includes("fichaje")) {
-        const script = document.createElement("script");
-        script.src = "frontend/js/fichaje.js";
+      // Cargar el script correspondiente si aplica
+      if (scriptPath) {
+        const script = document.createElement('script');
+        script.src = scriptPath;
         script.defer = true;
-        document.body.appendChild(script);
-      }
-
-      if (url.includes("dashboard")) {
-        const script = document.createElement("script");
-        script.src = "frontend/js/dashboard.js";
-        script.defer = true;
+        script.dataset.dynamic = 'true';
         document.body.appendChild(script);
       }
     })
     .catch(err => {
       console.error(err);
-      document.getElementById("main-content").innerHTML = `
+      document.getElementById('main-content').innerHTML = `
         <h2>Error</h2>
         <p>No se pudo cargar <code>${url}</code>.</p>
       `;
     });
 }
 
-// Cargar dashboard por defecto al iniciar
-window.addEventListener("DOMContentLoaded", () => loadPage("dashboard.html"));
+// Modal de acceso denegado si es empleado
+function mostrarAccesoDenegado() {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.style.display = 'flex';
+  modal.innerHTML = `
+    <div class="modal-box">
+      <h3>🚫 Acceso Denegado</h3>
+      <p>Solo el personal autorizado puede acceder a esta sección.</p>
+      <button onclick="this.closest('.modal-overlay').remove()">Aceptar</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+// Cargar contenido inicial (dashboard)
+window.addEventListener('DOMContentLoaded', () => {
+  loadPage('dashboard.html');
+});
