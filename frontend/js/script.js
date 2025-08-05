@@ -49,12 +49,16 @@ async function loadPage(page) {
       const script = document.createElement('script');
       script.src = 'frontend/js/insight_track.js';
       document.body.appendChild(script);
+    } else if (page === 'inicio') {
+      console.log('Cargando inicio.js (si existe)');
+      // Añadir inicio.js si lo creas
     }
 
-    // Verificar sesión para Insight Track
-    if (page === 'insight_track' && !getActiveEmployee()) {
-      console.log('Acceso denegado a Insight Track sin sesión');
-      main.innerHTML = '<div class="access-denied"><h2>🚫 Acceso restringido</h2><p>Debes iniciar sesión para acceder a esta herramienta.</p></div>';
+    // Verificar sesión para Inicio e Insight Track
+    const empleado = getActiveEmployee();
+    if (!empleado && (page === 'inicio' || page === 'insight_track')) {
+      console.log('Acceso denegado sin sesión a:', page);
+      main.innerHTML = '<div class="access-denied"><h2>🚫 Acceso restringido</h2><p>Debes iniciar sesión para acceder a esta sección.</p></div>';
     }
   } catch (error) {
     console.error('Error al cargar página:', error);
