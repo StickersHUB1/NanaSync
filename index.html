@@ -16,8 +16,16 @@
     </ul>
   </div>
 
-  <main id="main-content"></main>
+  <main id="main-content">
+    <!-- Contenido dinámico aquí -->
+  </main>
 
   <script src="frontend/js/script.js" defer></script>
+  <script>
+    // Carga inicial del dashboard automáticamente al abrir la web
+    window.addEventListener("DOMContentLoaded", () => {
+      loadPage('dashboard.html');
+    });
+  </script>
 </body>
 </html>
