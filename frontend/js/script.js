@@ -1,8 +1,7 @@
 function loadPage(url) {
-  // Verificar si el empleado autenticado intenta acceder a Insight Track
-  const sesion = JSON.parse(localStorage.getItem('empleadoActivo'));
-  if (url.includes('insight_track') && sesion) {
-    mostrarAccesoDenegado();
+  // Bloquear acceso a Insight Track si es empleado
+  if (url.includes('insight_track') && localStorage.getItem('empleadoActivo')) {
+    mostrarAlerta("Solo usuarios autorizados pueden acceder a Insight Track.");
     return;
   }
 
@@ -13,29 +12,7 @@ function loadPage(url) {
     })
     .then(html => {
       document.getElementById('main-content').innerHTML = html;
-
-      // Eliminar scripts dinámicos previos para evitar duplicados
-      const prevScripts = document.querySelectorAll('script[data-dynamic]');
-      prevScripts.forEach(s => s.remove());
-
-      // Determinar qué script cargar según la vista
-      let scriptPath = '';
-      if (url.includes('insight_track')) {
-        scriptPath = 'frontend/js/insight_track.js';
-      } else if (url.includes('fichaje')) {
-        scriptPath = 'frontend/js/fichaje.js';
-      } else if (url.includes('dashboard')) {
-        scriptPath = 'frontend/js/dashboard.js';
-      }
-
-      // Cargar el script correspondiente si aplica
-      if (scriptPath) {
-        const script = document.createElement('script');
-        script.src = scriptPath;
-        script.defer = true;
-        script.dataset.dynamic = 'true';
-        document.body.appendChild(script);
-      }
+      cargarScriptRelacionado(url);
     })
     .catch(err => {
       console.error(err);
@@ -46,22 +23,41 @@ function loadPage(url) {
     });
 }
 
-// Modal de acceso denegado si es empleado
-function mostrarAccesoDenegado() {
-  const modal = document.createElement('div');
-  modal.className = 'modal-overlay';
-  modal.style.display = 'flex';
+function cargarScriptRelacionado(url) {
+  const map = {
+    'insight_track': 'frontend/js/insight_track.js',
+    'fichaje': 'frontend/js/fichaje.js',
+    'dashboard': 'frontend/js/dashboard.js'
+  };
+
+  for (const key in map) {
+    if (url.includes(key)) {
+      const src = map[key];
+      if (!document.querySelector(`script[src="${src}"]`)) {
+        const script = document.createElement('script');
+        script.src = src;
+        script.defer = true;
+        document.body.appendChild(script);
+      }
+    }
+  }
+}
+
+// Modal de acceso denegado
+function mostrarAlerta(mensaje) {
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
   modal.innerHTML = `
     <div class="modal-box">
-      <h3>🚫 Acceso Denegado</h3>
-      <p>Solo el personal autorizado puede acceder a esta sección.</p>
-      <button onclick="this.closest('.modal-overlay').remove()">Aceptar</button>
+      <h3>⛔ Acceso Denegado</h3>
+      <p>${mensaje}</p>
+      <button onclick="this.parentElement.parentElement.remove()">Aceptar</button>
     </div>
   `;
   document.body.appendChild(modal);
 }
 
-// Cargar contenido inicial (dashboard)
-window.addEventListener('DOMContentLoaded', () => {
+// Carga inicial
+document.addEventListener("DOMContentLoaded", () => {
   loadPage('dashboard.html');
 });
