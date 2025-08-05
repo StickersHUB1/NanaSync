@@ -8,7 +8,7 @@
     <label for="password">Contraseña:</label>
     <input type="password" id="password" required />
 
-    <button type="submit">🕒 Fichar Entrada</button>
+    <button type="submit" id="checkin-btn">🕒 Fichar Entrada</button>
   </form>
 
   <div id="profile" style="display: none;">
@@ -22,7 +22,7 @@
     <div class="modal-box">
       <h3>¿Seguro que deseas terminar el turno?</h3>
       <button class="modal-action" onclick="confirmarTerminar()">✅ Confirmar</button>
-      <button onclick="cerrarModal()">Cancelar</button>
+      <button onclick="closeModal('modal')">Cancelar</button>
     </div>
   </div>
 </div>
