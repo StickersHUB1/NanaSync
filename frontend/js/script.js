@@ -7,27 +7,21 @@ function loadPage(url) {
     .then(html => {
       document.getElementById('main-content').innerHTML = html;
 
-      // Cargar script específico si corresponde
+      // Cargar script específico según el contenido cargado
+      const script = document.createElement('script');
+      script.defer = true;
+
       if (url.includes('insight_track')) {
-        const script = document.createElement('script');
         script.src = 'js/insight_track.js';
-        script.defer = true;
-        document.body.appendChild(script);
+      } else if (url.includes('fichaje')) {
+        script.src = 'js/fichaje.js';
+      } else if (url.includes('dashboard')) {
+        script.src = 'js/dashboard.js';
+      } else {
+        return; // No se carga script si no aplica
       }
 
-      if (url.includes('fichaje')) {
-        const script = document.createElement('script');
-        script.src = 'js/fichaje.js'; // solo si usas uno separado
-        script.defer = true;
-        document.body.appendChild(script);
-      }
-
-      if (url.includes('dashboard')) {
-        const script = document.createElement('script');
-        script.src = 'js/dashboard.js'; // opcional si tu dashboard tiene lógica
-        script.defer = true;
-        document.body.appendChild(script);
-      }
+      document.body.appendChild(script);
     })
     .catch(err => {
       console.error(err);
@@ -37,3 +31,8 @@ function loadPage(url) {
       `;
     });
 }
+
+// Carga inicial opcional (ej: dashboard al abrir)
+window.addEventListener('DOMContentLoaded', () => {
+  loadPage('dashboard.html'); // Puedes cambiar por el módulo por defecto
+});
