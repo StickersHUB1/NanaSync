@@ -61,18 +61,25 @@ function cargarMonitorizacion() {
   const grid = document.getElementById("monitorizacion-grid");
   if (!grid) return;
   grid.innerHTML = "";
-  empleados.filter(emp => emp.estado === "activo").forEach(emp => {
-    grid.appendChild(crearTarjeta(emp, true));
-  });
+  empleados
+    .filter(emp => emp.estado === "activo")
+    .forEach(emp => {
+      grid.appendChild(crearTarjeta(emp, true));
+    });
 }
 
 function switchTab(tab) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('visible'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(`${tab}-panel`).classList.add('visible');
+
+  const targetPanel = document.getElementById(`${tab}-panel`);
+  if (targetPanel) targetPanel.classList.add('visible');
+
   const btn = [...document.querySelectorAll('.tab-btn')].find(b => b.textContent.toLowerCase().includes(tab));
   if (btn) btn.classList.add('active');
-  tab === "actividad" ? cargarActividad() : cargarMonitorizacion();
+
+  if (tab === "actividad") cargarActividad();
+  else if (tab === "monitorizacion") cargarMonitorizacion();
 }
 
 function mostrarModal(emp) {
@@ -91,4 +98,7 @@ function accionSolicitarMonitorizacion() {
   cerrarModal();
 }
 
-switchTab("actividad");
+// Inicializa al cargar
+document.addEventListener("DOMContentLoaded", () => {
+  switchTab("actividad");
+});
