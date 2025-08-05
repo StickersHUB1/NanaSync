@@ -1,0 +1,43 @@
+<h1 class="page-title">Insight Track</h1>
+
+<div class="tab-buttons">
+  <button class="tab-btn active" onclick="switchTab('actividad')">Actividad</button>
+  <button class="tab-btn" onclick="switchTab('monitorizacion')">Monitorización</button>
+  <button class="tab-btn" onclick="switchTab('panel')">Panel</button>
+  <button class="tab-btn" onclick="switchTab('vincular')">Vincular</button>
+</div>
+
+<section id="actividad-panel" class="tab-panel visible">
+  <h2>Actividad</h2>
+  <div class="grid" id="actividad-grid"></div>
+</section>
+
+<section id="monitorizacion-panel" class="tab-panel">
+  <h2>Monitorización</h2>
+  <div class="grid" id="monitorizacion-grid"></div>
+</section>
+
+<section id="panel-panel" class="tab-panel">
+  <h2>Panel de Empleados</h2>
+  <p>Aquí se podrán dar de alta, editar o eliminar empleados.</p>
+  <div id="panel-content">
+    <!-- Contenido dinámico del panel -->
+  </div>
+</section>
+
+<section id="vincular-panel" class="tab-panel">
+  <h2>Vincular Dispositivo</h2>
+  <p>Aquí podrás generar un token para vincular un dispositivo con un empleado.</p>
+  <div id="vincular-content">
+    <!-- Formulario o lógica de vinculación -->
+  </div>
+</section>
+
+<div id="modal" class="modal-overlay" style="display: none;">
+  <div class="modal-box">
+    <h3 id="modal-title">Empleado</h3>
+    <p id="modal-description">Selecciona una acción:</p>
+    <button class="modal-action" onclick="accionSolicitarMonitorizacion()">📡 Solicitar Monitorización</button>
+    <button onclick="cerrarModal()">Cancelar</button>
+  </div>
+</div>
