@@ -1,5 +1,5 @@
 console.log('Iniciando fichaje.js');
-const API_URL = 'https://nanasyncbackend.onrender.com';
+// const API_URL = 'https://nanasyncbackend.onrender.com';
 
 async function login(id, password) {
   console.log('Intentando login con id:', id);
