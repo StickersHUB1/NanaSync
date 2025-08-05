@@ -1,8 +1,10 @@
 console.log('Iniciando fichaje.js');
-// const API_URL = 'https://nanasyncbackend.onrender.com';
 
+// ⚠️ Asegúrate de que API_URL ya está definido en script.js y es global
+
+// ==================== LOGIN ====================
 async function login(id, password) {
-  console.log('Intentando login con id:', id);
+  console.log('Intentando login con ID:', id);
   try {
     const res = await fetch(`${API_URL}/api/login`, {
       method: 'POST',
@@ -10,12 +12,13 @@ async function login(id, password) {
       body: JSON.stringify({ id, password })
     });
     const data = await res.json();
-    console.log('Respuesta de login:', data);
+
     if (res.ok) {
+      console.log('Login exitoso, datos:', data);
       localStorage.setItem('empleadoActivo', JSON.stringify(data));
-      console.log('Sesión almacenada en localStorage');
       mostrarPerfil(data);
     } else {
+      console.warn('Login fallido:', data.error);
       showNotification(data.error || 'Credenciales incorrectas');
     }
   } catch (err) {
@@ -24,64 +27,70 @@ async function login(id, password) {
   }
 }
 
+// ==================== PERFIL ====================
 function mostrarPerfil(empleado) {
-  console.log('Mostrando perfil para:', empleado.nombre);
   const profile = document.getElementById('profile');
   const form = document.getElementById('login-form');
   if (!profile || !form) {
-    console.error('Elementos profile o form no encontrados');
+    console.error('Elemento "profile" o "form" no encontrado en el DOM.');
     return;
   }
+
   form.style.display = 'none';
   profile.style.display = 'block';
 
   const photo = profile.querySelector('.photo');
-  if (photo) photo.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16); // Placeholder color
+  if (photo) {
+    photo.style.backgroundColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+  }
+
   document.getElementById('emp-name').textContent = empleado.nombre;
   document.getElementById('emp-role').textContent = empleado.rol;
-  document.getElementById('emp-specialty').textContent = empleado.puesto; // Usamos puesto como especialidad
+  document.getElementById('emp-specialty').textContent = empleado.puesto;
 }
 
-function terminarTurno() {
-  console.log('Iniciando proceso de cerrar sesión');
-  openModal('modal');
-}
-
+// ==================== LOGOUT ====================
 async function confirmarTerminar() {
-  console.log('Confirmando cierre de sesión');
   const empleado = getActiveEmployee();
-  if (empleado) {
-    try {
-      await fetch(`${API_URL}/api/logout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: empleado.id })
-      });
-      localStorage.removeItem('empleadoActivo');
-      console.log('Sesión eliminada de localStorage');
-      const profile = document.getElementById('profile');
-      const form = document.getElementById('login-form');
-      if (profile && form) {
-        profile.style.display = 'none';
-        form.style.display = 'block';
-      }
-      showNotification('Sesión cerrada', 'success');
-    } catch (err) {
-      console.error('Error en logout:', err);
-      showNotification('Error al cerrar sesión');
+  if (!empleado) return;
+
+  try {
+    await fetch(`${API_URL}/api/logout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: empleado.id })
+    });
+
+    localStorage.removeItem('empleadoActivo');
+    console.log('Logout exitoso');
+
+    const profile = document.getElementById('profile');
+    const form = document.getElementById('login-form');
+    if (profile && form) {
+      profile.style.display = 'none';
+      form.style.display = 'block';
     }
+
+    showNotification('Sesión cerrada correctamente', 'success');
+  } catch (err) {
+    console.error('Error cerrando sesión:', err);
+    showNotification('Error al cerrar sesión');
   }
+
   closeModal('modal');
 }
 
+// ==================== INIT DOM ====================
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM de fichaje cargado');
+  console.log('DOM cargado completamente (fichaje.js)');
+
   const form = document.getElementById('login-form');
   const loginBtn = document.getElementById('login-btn');
+
   if (form && loginBtn) {
     form.addEventListener('submit', (e) => {
-      console.log('Formulario de login enviado');
       e.preventDefault();
+
       loginBtn.disabled = true;
       loginBtn.textContent = 'Cargando...';
 
@@ -95,28 +104,43 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // 🔁 Mostrar perfil si ya hay sesión activa
   const empleado = getActiveEmployee();
   if (empleado) {
-    console.log('Sesión activa detectada, mostrando perfil');
-    mostrarPerfil(empleado);
+    console.log('Empleado activo detectado al cargar página:', empleado);
+    setTimeout(() => mostrarPerfil(empleado), 100); // Delay mínimo para asegurar HTML cargado
   }
 });
 
-// Funciones auxiliares
+// ==================== UTILS ====================
+function terminarTurno() {
+  openModal('modal');
+}
+
 function getActiveEmployee() {
-  const empleado = JSON.parse(localStorage.getItem('empleadoActivo')) || null;
-  console.log('Empleado activo:', empleado);
-  return empleado;
+  try {
+    return JSON.parse(localStorage.getItem('empleadoActivo')) || null;
+  } catch {
+    return null;
+  }
 }
 
 function showNotification(message, type) {
-  window.parent.showNotification(message, type);
+  if (window.parent && typeof window.parent.showNotification === 'function') {
+    window.parent.showNotification(message, type);
+  } else {
+    alert(message); // Fallback para pruebas locales
+  }
 }
 
 function openModal(modalId) {
-  window.parent.openModal(modalId);
+  if (window.parent && typeof window.parent.openModal === 'function') {
+    window.parent.openModal(modalId);
+  }
 }
 
 function closeModal(modalId) {
-  window.parent.closeModal(modalId);
+  if (window.parent && typeof window.parent.closeModal === 'function') {
+    window.parent.closeModal(modalId);
+  }
 }
