@@ -10,9 +10,9 @@
   <div class="sidebar">
     <h2>Nana Sync</h2>
     <ul>
-      <li><a href="#" onclick="loadPage('dashboard.html')">Dashboard</a></li>
-      <li><a href="#" onclick="navegarInsight()">Insight Track</a></li>
-      <li><a href="#" onclick="loadPage('fichaje.html')">Fichaje (Check-In)</a></li>
+      <li><a href="#" data-page="dashboard.html">Dashboard</a></li>
+      <li><a href="#" data-page="insight_track.html" class="insight-link">Insight Track</a></li>
+      <li><a href="#" data-page="fichaje.html">Fichaje (Check-In)</a></li>
     </ul>
   </div>
 
@@ -22,10 +22,13 @@
     <div class="modal-box">
       <h3>Acceso restringido</h3>
       <p>Solo los usuarios con permisos administrativos pueden acceder a Insight Track.</p>
-      <button onclick="cerrarBloqueo()">Aceptar</button>
+      <button onclick="closeModal('bloqueo-insight')">Aceptar</button>
     </div>
   </div>
 
+  <div id="notification" class="notification" style="display: none;"></div>
+
+  <script src="frontend/js/auth.js" defer></script>
   <script src="frontend/js/script.js" defer></script>
 </body>
 </html>
