@@ -1,44 +1,37 @@
 const empleados = [
   {
-    id: "1001",
-    password: "nata123",
-    nombre: "Lidia González",
+    nombre: "Aitana Rodríguez Santos",
     puesto: "Atención al Cliente",
-    horario: "09:00 – 17:00",
-    rol: "empleado"
+    horario: "06:00 – 14:00",
+    estado: "activo"
   },
   {
-    id: "admin01",
-    password: "adminpass",
-    nombre: "Administrador Central",
-    puesto: "Dirección",
-    horario: "24/7",
-    rol: "admin"
+    nombre: "Javier Torres Mejía",
+    puesto: "Soporte Técnico",
+    horario: "14:00 – 22:00",
+    estado: "inactivo"
+  },
+  {
+    nombre: "Lucía Moreno García",
+    puesto: "Administración",
+    horario: "09:00 – 17:00",
+    estado: "activo"
+  },
+  {
+    nombre: "Pedro Ruiz Cortés",
+    puesto: "Ventas",
+    horario: "10:00 – 18:00",
+    estado: "inactivo"
   }
 ];
-
-let empleadoSeleccionado = null;
-
-// Protección: bloquear empleados sin rol adecuado
-window.addEventListener("DOMContentLoaded", () => {
-  const activo = JSON.parse(localStorage.getItem("empleadoActivo") || "{}");
-  if (activo.rol === "empleado") {
-    document.getElementById("main-content").innerHTML = `
-      <div class="alerta-bloqueo">
-        <h2>⛔ Acceso Restringido</h2>
-        <p>Solo usuarios autorizados pueden acceder a Insight Track.</p>
-      </div>
-    `;
-    return;
-  }
-  switchTab("actividad"); // Cargar la pestaña por defecto
-});
 
 function horaDentroDeRango(rango) {
   const [start, end] = rango.split("–").map(h => parseInt(h.trim().split(":")[0]));
   const ahora = new Date().getHours();
   return ahora >= start && ahora < end;
 }
+
+let empleadoSeleccionado = null;
 
 function crearTarjeta(empleado, esInteractivo = false) {
   const card = document.createElement("div");
@@ -96,16 +89,19 @@ function cargarMonitorizacion() {
 }
 
 function switchTab(tab) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('visible'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(`${tab}-panel`).classList.add('visible');
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("visible"));
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
 
-  const btn = [...document.querySelectorAll('.tab-btn')]
-    .find(b => b.textContent.toLowerCase().includes(tab));
-  if (btn) btn.classList.add('active');
+  const panel = document.getElementById(`${tab}-panel`);
+  if (panel) panel.classList.add("visible");
+
+  const btn = [...document.querySelectorAll(".tab-btn")].find(b =>
+    b.textContent.toLowerCase().includes(tab)
+  );
+  if (btn) btn.classList.add("active");
 
   if (tab === "actividad") cargarActividad();
-  else if (tab === "monitorizacion") cargarMonitorizacion();
+  if (tab === "monitorizacion") cargarMonitorizacion();
 }
 
 function mostrarModal(emp) {
@@ -123,3 +119,26 @@ function accionSolicitarMonitorizacion() {
   alert(`Solicitud de monitorización enviada a ${empleadoSeleccionado.nombre}.`);
   cerrarModal();
 }
+
+function verificarAccesoAdmin() {
+  const activo = localStorage.getItem("empleadoActivo");
+  if (!activo) return false;
+
+  const user = JSON.parse(activo);
+  return user.rol === "admin";
+}
+
+// Inicialización
+window.addEventListener("DOMContentLoaded", () => {
+  if (!verificarAccesoAdmin()) {
+    document.getElementById("main-content").innerHTML = `
+      <div class="access-denied">
+        <h2>🚫 Acceso restringido</h2>
+        <p>Solo usuarios con permisos de administrador pueden acceder a Insight Track.</p>
+      </div>`;
+    return;
+  }
+
+  // Si es admin, iniciamos en la pestaña 'actividad'
+  switchTab("actividad");
+});
