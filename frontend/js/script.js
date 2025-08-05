@@ -15,3 +15,7 @@ if (url.includes('insight_track')) {
       console.error(err);
     });
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadPage('partials/dashboard.html');
+});
