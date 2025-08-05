@@ -40,4 +40,74 @@ async function loadPage(page) {
 
     // Cargar scripts específicos
     if (page === 'fichaje') {
-     
+      console.log('Cargando fichaje.js');
+      const script = document.createElement('script');
+      script.src = 'frontend/js/fichaje.js';
+      document.body.appendChild(script);
+    } else if (page === 'insight_track') {
+      console.log('Cargando insight_track.js');
+      const script = document.createElement('script');
+      script.src = 'frontend/js/insight_track.js';
+      document.body.appendChild(script);
+    }
+
+    // Verificar sesión para Insight Track
+    if (page === 'insight_track' && !getActiveEmployee()) {
+      console.log('Acceso denegado a Insight Track sin sesión');
+      main.innerHTML = '<div class="access-denied"><h2>🚫 Acceso restringido</h2><p>Debes iniciar sesión para acceder a esta herramienta.</p></div>';
+    }
+  } catch (error) {
+    console.error('Error al cargar página:', error);
+    main.innerHTML = '<p>Error al cargar la página. Intenta de nuevo.</p>';
+    showNotification(`Error: ${error.message}`);
+  }
+}
+
+// Navegación basada en el sidebar
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM completamente cargado');
+  const links = document.querySelectorAll('.sidebar a');
+  const main = document.querySelector('main');
+  if (!main) {
+    console.error('Elemento main no encontrado al cargar el DOM');
+    return;
+  }
+
+  links.forEach(link => {
+    link.addEventListener('click', (e) => {
+      console.log('Click en enlace:', link.href);
+      e.preventDefault();
+      const page = link.getAttribute('href');
+      if (page) loadPage(page);
+    });
+  });
+
+  // Cargar fichaje.html por defecto para login
+  console.log('Cargando página inicial: fichaje');
+  loadPage('fichaje');
+});
+
+// Funciones auxiliares
+function getActiveEmployee() {
+  const empleado = JSON.parse(localStorage.getItem('empleadoActivo')) || null;
+  console.log('Empleado activo:', empleado);
+  return empleado;
+}
+
+function isAdmin() {
+  const admin = getActiveEmployee() && getActiveEmployee().rol === 'admin';
+  console.log('¿Es admin?', admin);
+  return admin;
+}
+
+function closeModal(modalId) {
+  console.log('Cerrando modal:', modalId);
+  const modal = document.getElementById(modalId);
+  if (modal) modal.style.display = 'none';
+}
+
+function openModal(modalId) {
+  console.log('Abriendo modal:', modalId);
+  const modal = document.getElementById(modalId);
+  if (modal) modal.style.display = 'block';
+}
