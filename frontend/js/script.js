@@ -1,3 +1,4 @@
+// ✅ frontend/js/script.js
 function loadPage(url) {
   fetch(url)
     .then(res => {
@@ -5,34 +6,38 @@ function loadPage(url) {
       return res.text();
     })
     .then(html => {
-      document.getElementById('main-content').innerHTML = html;
+      document.getElementById("main-content").innerHTML = html;
 
-      // Cargar script específico según el contenido cargado
-      const script = document.createElement('script');
-      script.defer = true;
-
-      if (url.includes('insight_track')) {
-        script.src = 'js/insight_track.js';
-      } else if (url.includes('fichaje')) {
-        script.src = 'js/fichaje.js';
-      } else if (url.includes('dashboard')) {
-        script.src = 'js/dashboard.js';
-      } else {
-        return; // No se carga script si no aplica
+      // Cargar script específico si corresponde
+      if (url.includes("insight_track")) {
+        const script = document.createElement("script");
+        script.src = "frontend/js/insight_track.js";
+        script.defer = true;
+        document.body.appendChild(script);
       }
 
-      document.body.appendChild(script);
+      if (url.includes("fichaje")) {
+        const script = document.createElement("script");
+        script.src = "frontend/js/fichaje.js";
+        script.defer = true;
+        document.body.appendChild(script);
+      }
+
+      if (url.includes("dashboard")) {
+        const script = document.createElement("script");
+        script.src = "frontend/js/dashboard.js";
+        script.defer = true;
+        document.body.appendChild(script);
+      }
     })
     .catch(err => {
       console.error(err);
-      document.getElementById('main-content').innerHTML = `
+      document.getElementById("main-content").innerHTML = `
         <h2>Error</h2>
         <p>No se pudo cargar <code>${url}</code>.</p>
       `;
     });
 }
 
-// Carga inicial opcional (ej: dashboard al abrir)
-window.addEventListener('DOMContentLoaded', () => {
-  loadPage('dashboard.html'); // Puedes cambiar por el módulo por defecto
-});
+// Cargar dashboard por defecto al iniciar
+window.addEventListener("DOMContentLoaded", () => loadPage("dashboard.html"));
