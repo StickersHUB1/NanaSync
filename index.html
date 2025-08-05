@@ -1,34 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nana Sync</title>
-  <link rel="stylesheet" href="frontend/css/styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NanaSync - Inicio</title>
+  <link rel="stylesheet" href="frontend/css/styles.css">
 </head>
 <body>
-  <div class="sidebar">
-    <h2>Nana Sync</h2>
+  <header>
+    <h1>NanaSync</h1>
+  </header>
+  <main>
+    <p>Bienvenido a NanaSync. Por favor, selecciona una opción:</p>
     <ul>
-      <li><a href="#" data-page="dashboard.html">Dashboard</a></li>
-      <li><a href="#" data-page="insight_track.html" class="insight-link">Insight Track</a></li>
-      <li><a href="#" data-page="fichaje.html">Fichaje (Check-In)</a></li>
+      <li><a href="fichaje.html">Fichar Entrada/Salida</a></li>
+      <li><a href="insight_track.html">Insight Track</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
     </ul>
-  </div>
-
-  <main id="main-content"></main>
-
-  <div id="bloqueo-insight" class="modal-overlay" style="display: none;">
-    <div class="modal-box">
-      <h3>Acceso restringido</h3>
-      <p>Solo los usuarios con permisos administrativos pueden acceder a Insight Track.</p>
-      <button onclick="closeModal('bloqueo-insight')">Aceptar</button>
-    </div>
-  </div>
-
-  <div id="notification" class="notification" style="display: none;"></div>
-
-  <script src="frontend/js/auth.js" defer></script>
-  <script src="frontend/js/script.js" defer></script>
+  </main>
+  <script src="frontend/js/script.js"></script>
 </body>
 </html>
