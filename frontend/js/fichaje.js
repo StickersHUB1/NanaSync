@@ -15,61 +15,50 @@ const empleados = [
   }
 ];
 
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("checkin-form");
-  const profile = document.getElementById("profile");
-  const modal = document.getElementById("modal");
+const form = document.getElementById("checkin-form");
+const profile = document.getElementById("profile");
+const modal = document.getElementById("modal");
 
-  const empName = document.getElementById("emp-name");
-  const empRole = document.getElementById("emp-role");
-  const empHours = document.getElementById("emp-hours");
+form?.addEventListener("submit", e => {
+  e.preventDefault();
 
-  const mostrarPerfil = (empleado) => {
-    if (!empleado) return;
-    form.style.display = "none";
-    profile.style.display = "block";
-    empName.textContent = empleado.nombre;
-    empRole.textContent = empleado.puesto;
-    empHours.textContent = `Horario: ${empleado.horario}`;
-  };
+  const id = document.getElementById("employeeId").value.trim();
+  const password = document.getElementById("password").value.trim();
 
-  const cerrarModal = () => {
-    modal.style.display = "none";
-  };
+  const empleado = empleados.find(emp => emp.id === id && emp.password === password);
 
-  const terminarTurno = () => {
-    modal.style.display = "flex";
-  };
+  if (empleado) {
+    localStorage.setItem("empleadoActivo", JSON.stringify(empleado));
+    mostrarPerfil(empleado);
+  } else {
+    alert("Credenciales incorrectas");
+  }
+});
 
-  const confirmarTerminar = () => {
-    localStorage.removeItem("empleadoActivo");
-    location.reload();
-  };
+function mostrarPerfil(empleado) {
+  form.style.display = "none";
+  profile.style.display = "block";
+  document.getElementById("emp-name").innerText = empleado.nombre;
+  document.getElementById("emp-role").innerText = empleado.puesto;
+  document.getElementById("emp-hours").innerText = `Horario: ${empleado.horario}`;
+}
 
-  // Si ya fichó antes
+function terminarTurno() {
+  modal.style.display = "flex";
+}
+
+function cerrarModal() {
+  modal.style.display = "none";
+}
+
+function confirmarTerminar() {
+  localStorage.removeItem("empleadoActivo");
+  location.reload();
+}
+
+window.addEventListener("DOMContentLoaded", () => {
   const activo = localStorage.getItem("empleadoActivo");
   if (activo) {
-    const empleado = JSON.parse(activo);
-    mostrarPerfil(empleado);
+    mostrarPerfil(JSON.parse(activo));
   }
-
-  form.addEventListener("submit", e => {
-    e.preventDefault();
-    const id = document.getElementById("employeeId").value.trim();
-    const password = document.getElementById("password").value.trim();
-
-    const empleado = empleados.find(emp => emp.id === id && emp.password === password);
-
-    if (empleado) {
-      localStorage.setItem("empleadoActivo", JSON.stringify(empleado));
-      mostrarPerfil(empleado);
-    } else {
-      alert("❌ Credenciales incorrectas");
-    }
-  });
-
-  // Exponer funciones globalmente
-  window.terminarTurno = terminarTurno;
-  window.cerrarModal = cerrarModal;
-  window.confirmarTerminar = confirmarTerminar;
 });
