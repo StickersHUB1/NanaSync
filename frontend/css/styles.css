@@ -16,7 +16,7 @@ body {
 
 h1.page-title {
   font-size: 2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   color: #2c3e50;
 }
 
@@ -30,6 +30,7 @@ h1.page-title {
   position: fixed;
   height: 100vh;
   overflow-y: auto;
+  z-index: 1100;
 }
 
 .sidebar h2 {
@@ -50,11 +51,15 @@ h1.page-title {
   text-decoration: none;
   color: #2c3e50;
   font-weight: 500;
-  transition: color 0.2s;
+  display: block;
+  padding: 0.8rem 1rem;
+  border-radius: 6px;
+  transition: color 0.2s, background-color 0.2s;
 }
 
 .sidebar ul li a:hover {
   color: #3498db;
+  background-color: rgba(255, 255, 255, 0.5);
 }
 
 /* === MAIN CONTENT === */
@@ -62,6 +67,7 @@ main {
   margin-left: 220px;
   padding: 2rem;
   flex-grow: 1;
+  transition: opacity 0.3s ease;
 }
 
 /* === INFO CARDS (Dashboard) === */
@@ -78,11 +84,12 @@ main {
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .info-card:hover {
   transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .info-card h3 {
@@ -95,6 +102,7 @@ main {
   font-size: 0.9rem;
   color: #555;
   text-align: center;
+  line-height: 1.5;
 }
 
 /* === TABS (Insight Track) === */
@@ -110,12 +118,17 @@ main {
   background-color: #eaeef2;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  font-weight: 500;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .tab-btn.active {
   background-color: #3498db;
   color: #fff;
+}
+
+.tab-btn:hover:not(.active) {
+  background-color: #d5dce3;
 }
 
 .tab-panel {
@@ -141,7 +154,13 @@ main {
   display: flex;
   align-items: center;
   gap: 1rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .status-dot {
@@ -185,11 +204,17 @@ main {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.4);
-  display: flex;
+  background: rgba(0, 0, 0, 0.4);
+  display: none;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+  display: flex;
+  opacity: 1;
 }
 
 .modal-box {
@@ -199,46 +224,183 @@ main {
   max-width: 400px;
   width: 90%;
   text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.modal-box button {
+  margin: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
 }
 
 .modal-action {
   background-color: #3498db;
   color: white;
-  padding: 0.6rem 1.2rem;
-  border: none;
-  border-radius: 6px;
-  margin-top: 1rem;
-  cursor: pointer;
+}
+
+.modal-action:hover {
+  background-color: #2980b9;
+}
+
+.modal-box button:not(.modal-action) {
+  background-color: #ecf0f1;
+  color: #333;
+}
+
+.modal-box button:not(.modal-action):hover {
+  background-color: #d5dce3;
 }
 
 /* === CHECKIN (Fichaje) === */
 .checkin-container {
   max-width: 400px;
-  margin: 0 auto;
+  margin: 2rem auto;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(8px);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+}
+
+#checkin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 #checkin-form input {
-  width: 100%;
   padding: 0.6rem;
-  margin-bottom: 1rem;
   border-radius: 6px;
   border: 1px solid #ccc;
+  font-size: 1rem;
 }
 
 #checkin-form button {
-  width: 100%;
   padding: 0.7rem;
   background-color: #27ae60;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+#checkin-form button:hover {
+  background-color: #219653;
+}
+
+#checkin-form button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+#profile {
+  text-align: center;
 }
 
 #profile h2 {
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
 }
 
 #profile p {
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.8rem;
+  color: #555;
+}
+
+#profile button {
+  padding: 0.7rem;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#profile button:hover {
+  background-color: #c0392b;
+}
+
+/* === VINCULAR FORM === */
+#vincular-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+#vincular-form input {
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+#vincular-form button {
+  padding: 0.7rem;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#vincular-form button:hover {
+  background-color: #2980b9;
+}
+
+#vincular-form button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+/* === NOTIFICATIONS === */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 1rem;
+  border-radius: 6px;
+  color: white;
+  z-index: 2000;
+  transition: opacity 0.3s ease;
+}
+
+.notification.error {
+  background-color: #e74c3c;
+}
+
+.notification.success {
+  background-color: #2ecc71;
+}
+
+/* === RESPONSIVE DESIGN === */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  main {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }
