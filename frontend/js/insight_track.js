@@ -1,3 +1,5 @@
+const API_URL = 'https://nanasyncbackend.onrender.com';
+
 const empleados = [
   {
     nombre: 'Aitana Rodríguez Santos',
@@ -88,9 +90,9 @@ function cargarVincular() {
     e.preventDefault();
     const idEmpleado = document.getElementById('employeeId').value;
     const nombreDispositivo = document.getElementById('deviceName').value;
-    
+
     try {
-      const res = await fetch('/api/vincular', {
+      const res = await fetch(`${API_URL}/api/vincular`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idEmpleado, nombreDispositivo })
@@ -128,7 +130,6 @@ function accionSolicitarMonitorizacion() {
   closeModal('modal');
 }
 
-// Inicialización
 window.addEventListener('DOMContentLoaded', () => {
   if (!isAdmin()) {
     document.getElementById('main-content').innerHTML = `
@@ -139,7 +140,6 @@ window.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // Configurar eventos de pestañas
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
   });
