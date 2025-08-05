@@ -7,23 +7,22 @@ function loadPage(url) {
     .then(html => {
       document.getElementById('main-content').innerHTML = html;
 
-      // Cargar el JS correspondiente según la página
-      let scriptName = "";
-      if (url.includes("dashboard")) scriptName = "dashboard.js";
-      if (url.includes("fichaje")) scriptName = "fichaje.js";
-      if (url.includes("insight_track")) scriptName = "insight_track.js";
+      // Cargar el JS específico si es necesario
+      const script = document.createElement('script');
+      script.defer = true;
 
-      if (scriptName) {
-        const script = document.createElement("script");
-        script.src = `frontend/js/${scriptName}`;
-        script.defer = true;
-        script.onload = () => {
-          if (url.includes("insight_track")) {
-            if (typeof switchTab === "function") {
-              switchTab("actividad"); // Activar pestaña por defecto
-            }
-          }
-        };
+      if (url.includes('dashboard')) {
+        script.src = 'frontend/js/dashboard.js';
+        document.body.appendChild(script);
+      }
+
+      if (url.includes('fichaje')) {
+        script.src = 'frontend/js/fichaje.js';
+        document.body.appendChild(script);
+      }
+
+      if (url.includes('insight_track')) {
+        script.src = 'frontend/js/insight_track.js';
         document.body.appendChild(script);
       }
     })
@@ -36,33 +35,22 @@ function loadPage(url) {
     });
 }
 
-function handleInsightTrackAccess() {
-  const empleadoActivo = localStorage.getItem("empleadoActivo");
-  if (!empleadoActivo) {
-    // No ha iniciado sesión aún
-    loadPage("insight_track.html");
+// Navegación con protección para Insight Track
+function navegarInsight() {
+  const datos = JSON.parse(localStorage.getItem("empleadoActivo"));
+  if (!datos || datos.rol !== "admin") {
+    document.getElementById("bloqueo-insight").style.display = "flex";
     return;
   }
-
-  const datos = JSON.parse(empleadoActivo);
-  if (datos.rol && datos.rol === "admin") {
-    loadPage("insight_track.html");
-  } else {
-    mostrarAccesoDenegado();
-  }
+  loadPage("insight_track.html");
 }
 
-function mostrarAccesoDenegado() {
-  const modal = document.getElementById("access-denied-modal");
-  if (modal) modal.style.display = "flex";
+// Cierre del modal de bloqueo
+function cerrarBloqueo() {
+  document.getElementById("bloqueo-insight").style.display = "none";
 }
 
-function cerrarAccesoDenegado() {
-  const modal = document.getElementById("access-denied-modal");
-  if (modal) modal.style.display = "none";
-}
-
-// Cargar Dashboard por defecto al iniciar
+// Al iniciar, cargar el dashboard por defecto
 window.addEventListener("DOMContentLoaded", () => {
   loadPage("dashboard.html");
 });
