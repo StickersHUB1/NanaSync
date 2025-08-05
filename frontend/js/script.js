@@ -1,10 +1,4 @@
 function loadPage(url) {
-  // Bloquear acceso a Insight Track si es empleado
-  if (url.includes('insight_track') && localStorage.getItem('empleadoActivo')) {
-    mostrarAlerta("Solo usuarios autorizados pueden acceder a Insight Track.");
-    return;
-  }
-
   fetch(url)
     .then(res => {
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
@@ -12,7 +6,26 @@ function loadPage(url) {
     })
     .then(html => {
       document.getElementById('main-content').innerHTML = html;
-      cargarScriptRelacionado(url);
+
+      // Cargar el JS correspondiente según la página
+      let scriptName = "";
+      if (url.includes("dashboard")) scriptName = "dashboard.js";
+      if (url.includes("fichaje")) scriptName = "fichaje.js";
+      if (url.includes("insight_track")) scriptName = "insight_track.js";
+
+      if (scriptName) {
+        const script = document.createElement("script");
+        script.src = `frontend/js/${scriptName}`;
+        script.defer = true;
+        script.onload = () => {
+          if (url.includes("insight_track")) {
+            if (typeof switchTab === "function") {
+              switchTab("actividad"); // Activar pestaña por defecto
+            }
+          }
+        };
+        document.body.appendChild(script);
+      }
     })
     .catch(err => {
       console.error(err);
@@ -23,41 +36,33 @@ function loadPage(url) {
     });
 }
 
-function cargarScriptRelacionado(url) {
-  const map = {
-    'insight_track': 'frontend/js/insight_track.js',
-    'fichaje': 'frontend/js/fichaje.js',
-    'dashboard': 'frontend/js/dashboard.js'
-  };
+function handleInsightTrackAccess() {
+  const empleadoActivo = localStorage.getItem("empleadoActivo");
+  if (!empleadoActivo) {
+    // No ha iniciado sesión aún
+    loadPage("insight_track.html");
+    return;
+  }
 
-  for (const key in map) {
-    if (url.includes(key)) {
-      const src = map[key];
-      if (!document.querySelector(`script[src="${src}"]`)) {
-        const script = document.createElement('script');
-        script.src = src;
-        script.defer = true;
-        document.body.appendChild(script);
-      }
-    }
+  const datos = JSON.parse(empleadoActivo);
+  if (datos.rol && datos.rol === "admin") {
+    loadPage("insight_track.html");
+  } else {
+    mostrarAccesoDenegado();
   }
 }
 
-// Modal de acceso denegado
-function mostrarAlerta(mensaje) {
-  const modal = document.createElement("div");
-  modal.className = "modal-overlay";
-  modal.innerHTML = `
-    <div class="modal-box">
-      <h3>⛔ Acceso Denegado</h3>
-      <p>${mensaje}</p>
-      <button onclick="this.parentElement.parentElement.remove()">Aceptar</button>
-    </div>
-  `;
-  document.body.appendChild(modal);
+function mostrarAccesoDenegado() {
+  const modal = document.getElementById("access-denied-modal");
+  if (modal) modal.style.display = "flex";
 }
 
-// Carga inicial
-document.addEventListener("DOMContentLoaded", () => {
-  loadPage('dashboard.html');
+function cerrarAccesoDenegado() {
+  const modal = document.getElementById("access-denied-modal");
+  if (modal) modal.style.display = "none";
+}
+
+// Cargar Dashboard por defecto al iniciar
+window.addEventListener("DOMContentLoaded", () => {
+  loadPage("dashboard.html");
 });
