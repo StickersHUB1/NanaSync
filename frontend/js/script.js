@@ -14,6 +14,7 @@ function showNotification(message, type = 'error') {
 }
 
 // Función para cargar páginas dinámicamente
+const API_URL = 'https://nanasyncbackend.onrender.com';
 async function loadPage(page) {
   const main = document.querySelector('main');
   if (!main) {
@@ -28,6 +29,16 @@ async function loadPage(page) {
     if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
     main.innerHTML = await response.text();
     main.style.opacity = '1'; // Restaurar opacidad
+    // Cargar scripts específicos si es necesario
+    if (page === 'fichaje') {
+      const script = document.createElement('script');
+      script.src = 'frontend/js/fichaje.js';
+      document.body.appendChild(script);
+    } else if (page === 'insight_track') {
+      const script = document.createElement('script');
+      script.src = 'frontend/js/insight_track.js';
+      document.body.appendChild(script);
+    }
   } catch (error) {
     main.innerHTML = '<p>Error al cargar la página. Intenta de nuevo.</p>';
     showNotification(`Error: ${error.message}`);
@@ -47,32 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
   links.forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      const page = link.getAttribute('href').replace('.html', ''); // Extraer nombre de la página
+      const page = link.getAttribute('href');
       if (page) loadPage(page);
     });
   });
 
-  // Cargar página inicial (por ejemplo, 'fichaje' o 'index')
-  const initialPage = window.location.pathname.split('/').pop() || 'index';
-  if (initialPage && initialPage !== 'index.html') {
-    loadPage(initialPage.replace('.html', ''));
-  }
-});
-
-// Funciones auxiliares (ajústalas según necesites)
-function getActiveEmployee() {
-  return JSON.parse(localStorage.getItem('empleadoActivo')) || null;
-}
-
-function isAdmin() {
-  const empleado = getActiveEmployee();
-  return empleado && empleado.rol === 'admin';
-}
-
-function closeModal(modalId) {
-  document.getElementById(modalId).style.display = 'none';
-}
-
-function openModal(modalId) {
-  document.getElementById(modalId).style.display = 'block';
-}
+  // Cargar página inicial
