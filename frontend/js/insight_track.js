@@ -1,37 +1,44 @@
 const empleados = [
   {
-    nombre: "Aitana Rodríguez Santos",
+    id: "1001",
+    password: "nata123",
+    nombre: "Lidia González",
     puesto: "Atención al Cliente",
-    horario: "06:00 – 14:00",
-    estado: "activo"
-  },
-  {
-    nombre: "Javier Torres Mejía",
-    puesto: "Soporte Técnico",
-    horario: "14:00 – 22:00",
-    estado: "inactivo"
-  },
-  {
-    nombre: "Lucía Moreno García",
-    puesto: "Administración",
     horario: "09:00 – 17:00",
-    estado: "activo"
+    rol: "empleado"
   },
   {
-    nombre: "Pedro Ruiz Cortés",
-    puesto: "Ventas",
-    horario: "10:00 – 18:00",
-    estado: "inactivo"
+    id: "admin01",
+    password: "adminpass",
+    nombre: "Administrador Central",
+    puesto: "Dirección",
+    horario: "24/7",
+    rol: "admin"
   }
 ];
+
+let empleadoSeleccionado = null;
+
+// Protección: bloquear empleados sin rol adecuado
+window.addEventListener("DOMContentLoaded", () => {
+  const activo = JSON.parse(localStorage.getItem("empleadoActivo") || "{}");
+  if (activo.rol === "empleado") {
+    document.getElementById("main-content").innerHTML = `
+      <div class="alerta-bloqueo">
+        <h2>⛔ Acceso Restringido</h2>
+        <p>Solo usuarios autorizados pueden acceder a Insight Track.</p>
+      </div>
+    `;
+    return;
+  }
+  switchTab("actividad"); // Cargar la pestaña por defecto
+});
 
 function horaDentroDeRango(rango) {
   const [start, end] = rango.split("–").map(h => parseInt(h.trim().split(":")[0]));
   const ahora = new Date().getHours();
   return ahora >= start && ahora < end;
 }
-
-let empleadoSeleccionado = null;
 
 function crearTarjeta(empleado, esInteractivo = false) {
   const card = document.createElement("div");
@@ -89,12 +96,16 @@ function cargarMonitorizacion() {
 }
 
 function switchTab(tab) {
-  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("visible"));
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-  document.getElementById(`${tab}-panel`).classList.add("visible");
-  const btn = [...document.querySelectorAll(".tab-btn")].find(b => b.textContent.toLowerCase().includes(tab));
-  if (btn) btn.classList.add("active");
-  tab === "actividad" ? cargarActividad() : cargarMonitorizacion();
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('visible'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`${tab}-panel`).classList.add('visible');
+
+  const btn = [...document.querySelectorAll('.tab-btn')]
+    .find(b => b.textContent.toLowerCase().includes(tab));
+  if (btn) btn.classList.add('active');
+
+  if (tab === "actividad") cargarActividad();
+  else if (tab === "monitorizacion") cargarMonitorizacion();
 }
 
 function mostrarModal(emp) {
@@ -112,8 +123,3 @@ function accionSolicitarMonitorizacion() {
   alert(`Solicitud de monitorización enviada a ${empleadoSeleccionado.nombre}.`);
   cerrarModal();
 }
-
-// Autoejecutar al cargar
-window.addEventListener("DOMContentLoaded", () => {
-  switchTab("actividad");
-});
