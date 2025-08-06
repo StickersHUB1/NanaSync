@@ -36,14 +36,20 @@ function navigateTo(url) {
   router();
 }
 
-// Enrutador principal
+function updateActiveLink(path) {
+  document.querySelectorAll(".nav-link").forEach((link) => {
+    const href = new URL(link.href).pathname;
+    link.classList.toggle("active", href === path);
+  });
+}
+
 async function router() {
   const path = window.location.pathname;
   const page = routes[path] || "inicio";
-
-  console.log("Ruta actual:", path, "| Cargando:", page);
+  updateActiveLink(path); // ✅ activa el enlace del sidebar
   await loadPage(page);
 }
+
 
 // Carga dinámica de página
 async function loadPage(pageName) {
