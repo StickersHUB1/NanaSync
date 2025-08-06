@@ -7,7 +7,7 @@ console.log("API_URL configurada como:", API_URL);
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM completamente cargado");
 
-  const initialPage = "fichaje";
+  const initialPage = "inicio";
   loadPage(initialPage);
 });
 
