@@ -1,26 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NanaSync</title>
-  <link rel="stylesheet" href="frontend/css/styles.css">
+  <link rel="stylesheet" href="frontend/css/styles.css" />
 </head>
 <body>
   <header>
-    <h1>NanaSync</h1>
+    <nav>
+      <a href="/inicio" data-link>Inicio</a>
+      <a href="/fichaje" data-link>Fichaje</a>
+      <a href="/insight_track" data-link>Insight</a>
+    </nav>
   </header>
-  <div class="sidebar">
-    <ul>
-      <li><a href="inicio">Inicio</a></li> <!-- Renombrado de Dashboard a Inicio -->
-      <li><a href="fichaje">Fichajes</a></li>
-      <li><a href="insight_track">Insight Track</a></li>
-    </ul>
-  </div>
-  <main>
-    <!-- Carga inicial de fichaje.html -->
-    <div id="notification" class="notification"></div>
-  </main>
-  <script src="frontend/js/script.js"></script>
+
+  <main id="main-content"></main>
+
+  <div id="notification" class="notification"></div>
+
+  <script src="frontend/js/script.js" type="module"></script>
 </body>
 </html>
