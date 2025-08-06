@@ -3,73 +3,91 @@ console.log("Iniciando script.js");
 const API_URL = "https://nanasyncbackend.onrender.com";
 console.log("API_URL configurada como:", API_URL);
 
-// Carga inicial
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM completamente cargado");
+// Mapear rutas a archivos
+const routes = {
+  "/": "inicio",
+  "/inicio": "inicio",
+  "/fichaje": "fichaje",
+  "/dashboard": "dashboard",
+  "/insight_track": "insight_track",
+};
 
-  const initialPage = "inicio";
-  loadPage(initialPage);
-});
-
-// Prevención de duplicados al recargar scripts
 const loadedScripts = new Set();
 
-// Función para cargar páginas dinámicamente
-async function loadPage(pageName) {
-  console.log("Cargando página:", pageName);
+// Carga inicial
+document.addEventListener("DOMContentLoaded", () => {
+  router();
+  // Captura clicks en <a data-link>
+  document.body.addEventListener("click", (e) => {
+    if (e.target.matches("[data-link]")) {
+      e.preventDefault();
+      navigateTo(e.target.href);
+    }
+  });
 
+  window.onpopstate = () => {
+    router();
+  };
+});
+
+// Navegación limpia
+function navigateTo(url) {
+  history.pushState(null, null, url);
+  router();
+}
+
+// Enrutador principal
+async function router() {
+  const path = window.location.pathname;
+  const page = routes[path] || "inicio";
+
+  console.log("Ruta actual:", path, "| Cargando:", page);
+  await loadPage(page);
+}
+
+// Carga dinámica de página
+async function loadPage(pageName) {
   const response = await fetch(`${pageName}.html`);
   const html = await response.text();
   document.querySelector("main").innerHTML = html;
 
   const scriptPath = `frontend/js/${pageName}.js`;
   if (!loadedScripts.has(scriptPath)) {
-    try {
-      const script = document.createElement("script");
-      script.src = scriptPath;
-      script.defer = true;
-      document.body.appendChild(script);
-      loadedScripts.add(scriptPath);
-      console.log(`${scriptPath} cargado`);
-    } catch (err) {
-      console.error(`Error cargando script: ${scriptPath}`, err);
-    }
-  } else {
-    console.log(`${scriptPath} ya estaba cargado`);
+    const script = document.createElement("script");
+    script.src = scriptPath;
+    script.defer = true;
+    document.body.appendChild(script);
+    loadedScripts.add(scriptPath);
+    console.log(`Script cargado: ${scriptPath}`);
   }
 
-  // Reglas de acceso
+  // Acceso restringido
   if (pageName === "insight_track") {
     const empleado = getActiveEmployee();
     if (!empleado || empleado.rol !== "admin") {
-      console.warn("Acceso denegado a Insight Track");
       showNotification("Acceso restringido: solo administradores");
       document.querySelector("main").innerHTML = `
         <div class="access-denied">
           <h2>🚫 Acceso Denegado</h2>
           <p>Solo los empleados autorizados pueden acceder a Insight Track.</p>
-        </div>
-      `;
+        </div>`;
       return;
     }
   }
 }
 
-// Función utilitaria para leer sesión
+// Obtener sesión activa
 function getActiveEmployee() {
   try {
     const empleado = JSON.parse(localStorage.getItem("empleadoActivo"));
-    if (empleado && typeof empleado === "object") {
-      console.log("Empleado activo:", empleado);
-      return empleado;
-    }
+    if (empleado && typeof empleado === "object") return empleado;
   } catch (err) {
     console.warn("Error leyendo localStorage:", err);
   }
   return null;
 }
 
-// Sistema de notificaciones visuales global
+// Notificaciones visuales
 function showNotification(message, type = "info") {
   const notification = document.getElementById("notification");
   if (!notification) return;
@@ -83,7 +101,4 @@ function showNotification(message, type = "info") {
   }, 4000);
 }
 
-// Exponer funciones globales
-window.loadPage = loadPage;
-window.getActiveEmployee = getActiveEmployee;
-window.showNotification = showNotification;
+window.navigateTo = navigateTo;
