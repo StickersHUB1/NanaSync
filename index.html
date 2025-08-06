@@ -1,15 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NanaSync</title>
+  <link rel="stylesheet" href="frontend/css/styles.css" />
+</head>
 <body>
   <header>
-    <h1>Panel de Administración</h1>
+    <h1>NanaSync Panel</h1>
   </header>
 
   <div class="layout">
     <aside class="sidebar">
-      <nav>
-        <a href="/inicio" data-link>Inicio</a>
-        <a href="/fichaje" data-link>Fichaje</a>
-        <a href="/insight_track" data-link>Insight</a>
-      </nav>
+      <ul>
+        <li><a href="/inicio" data-link class="nav-link">Inicio</a></li>
+        <li><a href="/fichaje" data-link class="nav-link">Fichaje</a></li>
+        <li><a href="/insight_track" data-link class="nav-link">Insight</a></li>
+      </ul>
     </aside>
 
     <main id="main-content">
@@ -18,5 +26,7 @@
   </div>
 
   <div id="notification" class="notification"></div>
+
   <script src="frontend/js/script.js" type="module"></script>
 </body>
+</html>
