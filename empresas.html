@@ -1,0 +1,84 @@
+<section class="empresas-section">
+
+  <!-- 🔹 BOTONES DE ACCESO -->
+  <div class="empresa-auth-cta glass-box">
+    <h2>NanaSync para Empresas</h2>
+    <div class="auth-actions">
+      <button id="btn-open-registro" class="btn">Registrar empresa</button>
+      <button id="btn-open-login" class="btn btn-secondary">Iniciar sesión</button>
+    </div>
+  </div>
+
+  <!-- 🔸 MODAL DE REGISTRO / LOGIN (se alternan con JS) -->
+  <div id="modal-auth" class="modal-overlay" style="display: none;">
+    <div class="modal glass-box">
+
+      <!-- FORM REGISTRO -->
+<form id="form-registro-empresa" class="auth-form">
+  <h2>Registrar Empresa</h2>
+  <label for="nombre">Nombre de la empresa:</label>
+  <input type="text" id="nombre" name="nombre" required />
+
+  <label for="email">Correo electrónico:</label>
+  <input type="email" id="email" name="email" required />
+
+  <label for="password">Contraseña:</label>
+  <input type="password" id="password" name="password" required />
+
+  <button type="submit" class="btn">Registrar</button>
+</form>
+
+
+      <!-- FORM LOGIN -->
+      <form id="form-login-empresa" class="auth-form" style="display: none;">
+        <h2>Iniciar Sesión</h2>
+        <label for="login-email">Correo electrónico:</label>
+        <input type="email" id="login-email" name="login-email" required />
+
+        <label for="login-password">Contraseña:</label>
+        <input type="password" id="login-password" name="login-password" required />
+
+        <button type="submit" class="btn btn-secondary">Acceder</button>
+      </form>
+
+      <!-- Cerrar -->
+      <button id="btn-close-modal" class="btn-close" aria-label="Cerrar">×</button>
+    </div>
+  </div>
+
+  <!-- 🔹 MISIÓN / PROPÓSITO -->
+  <div class="empresa-intro glass-box">
+    <h1>Nuestra misión</h1>
+    <p>
+      En Nana Sync ayudamos a empresas a digitalizar sus operaciones y resolver problemas reales con herramientas funcionales y escalables.
+    </p>
+  </div>
+
+  <!-- 🔸 MODELO DE SUSCRIPCIÓN -->
+  <div class="empresa-subscription glass-box">
+    <h2>¿Cómo funciona?</h2>
+    <p>
+      Trabajamos mediante un sistema de suscripción activa mensual. Las empresas acceden a herramientas según el plan contratado.
+    </p>
+  </div>
+
+  <!-- ✅ DASHBOARD EMPRESA (oculto inicialmente) -->
+  <section class="empresa-dashboard glass-box hidden" id="empresa-dashboard">
+    <div class="dashboard-header">
+      <h2>Empresa X S.S.L</h2>
+      <h3>DASHBOARD</h3>
+    </div>
+
+    <div class="dashboard-tabs">
+      <button data-tab="empleados">EMPLEADOS</button>
+      <button data-tab="actividad" data-page="actividad.html">ACTIVIDAD</button>
+      <button data-tab="monitorizar">MONITORIZAR</button>
+      <button data-page="gestion.html" data-tab="gestion">GESTIÓN</button>
+    </div>
+
+    <div class="dashboard-content" id="dashboard-content">
+      <p>Selecciona una pestaña para ver el contenido.</p>
+    </div>
+  </section>
+
+</section>
