@@ -44,46 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initModalesAuth();
     initDashboard();
 
-    // === Formulario para crear nuevo empleado ===
-    if (document.getElementById("form-nuevo-empleado")) {
-      document.getElementById("form-nuevo-empleado").addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const form = e.target;
-        const datos = {
-          nombre: form.nombre.value,
-          edad: Number(form.edad.value),
-          puesto: form.puesto.value,
-          rango: form.rango.value,
-          horario: {
-            entrada: form.entrada.value,
-            salida: form.salida.value
-          },
-          rol: "empleado",
-          estadoConexion: "inactivo",
-          fichado: false,
-          ultimoFichaje: new Date().toISOString(),
-          empresaId: "64d8f1d2f9a9b12e4d3c1e7a"
-        };
-
-        try {
-          const res = await fetch("https://nanasync-backend.onrender.com/api/empleados", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(datos)
-          });
-
-          const resultado = await res.json();
-          document.getElementById("respuesta-empleado").innerText =
-            res.ok ? "✅ Empleado añadido correctamente" : "❌ Error: " + resultado.error;
-        } catch (err) {
-          console.error(err);
-          document.getElementById("respuesta-empleado").innerText = "❌ Error al conectar con el servidor";
-        }
-      });
-    }
-
-    // === Formulario de registro de empresa ===
+    // === Registro de empresa ===
     const formRegistro = document.getElementById("form-registro-empresa");
     formRegistro?.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -105,11 +66,51 @@ document.addEventListener("DOMContentLoaded", () => {
           alert(`❌ Error: ${data.error}`);
         } else {
           alert("✅ Empresa registrada correctamente.");
+          setLoggedIn();
           document.getElementById("modal-auth").style.display = "none";
+          mostrarDashboard();
         }
       } catch (err) {
         console.error("Error registrando empresa:", err);
         alert("❌ Error de red");
+      }
+    });
+
+    // === Crear nuevo empleado ===
+    const formEmpleado = document.getElementById("form-nuevo-empleado");
+    formEmpleado?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const form = e.target;
+      const datos = {
+        nombre: form.nombre.value,
+        edad: Number(form.edad.value),
+        puesto: form.puesto.value,
+        rango: form.rango.value,
+        horario: {
+          entrada: form.entrada.value,
+          salida: form.salida.value
+        },
+        rol: "empleado",
+        estadoConexion: "inactivo",
+        fichado: false,
+        ultimoFichaje: new Date().toISOString(),
+        empresaId: "64d8f1d2f9a9b12e4d3c1e7a" // ← debes reemplazarlo luego con empresa logueada
+      };
+
+      try {
+        const res = await fetch("https://nanasync-backend.onrender.com/api/empleados", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(datos)
+        });
+
+        const resultado = await res.json();
+        document.getElementById("respuesta-empleado").innerText =
+          res.ok ? "✅ Empleado añadido correctamente" : "❌ Error: " + resultado.error;
+      } catch (err) {
+        console.error(err);
+        document.getElementById("respuesta-empleado").innerText = "❌ Error al conectar con el servidor";
       }
     });
   };
