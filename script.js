@@ -82,6 +82,36 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     }
+
+    // === Formulario de registro de empresa ===
+    const formRegistro = document.getElementById("form-registro-empresa");
+    formRegistro?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const nombre = document.getElementById("nombre").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const res = await fetch("https://nanasync-backend.onrender.com/api/empresas", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nombre, email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(`❌ Error: ${data.error}`);
+        } else {
+          alert("✅ Empresa registrada correctamente.");
+          document.getElementById("modal-auth").style.display = "none";
+        }
+      } catch (err) {
+        console.error("Error registrando empresa:", err);
+        alert("❌ Error de red");
+      }
+    });
   };
 
   const mostrarDashboard = () => {
