@@ -43,6 +43,17 @@ async function fetchPage(page) {
   main.scrollTo?.(0, 0);
 }
 
+// Carga dinámica de scripts externos
+async function loadScript(url) {
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = url;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error(`No se pudo cargar ${url}`));
+    document.head.appendChild(s);
+  });
+}
+
 // --- Inicialización de listeners globales ---
 document.addEventListener('DOMContentLoaded', () => {
   // Delegación de clicks del sidebar y CTA
@@ -63,9 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (a.matches('.sidebar-nav a,[data-page]')) {
       e.preventDefault();
       if (a.hasAttribute('data-home')) {
-        // Re-render del home sin recargar completamente
         window.location.hash = '';
-        window.location.reload(); // simple y robusto para el hero
+        window.location.reload();
         return;
       }
       const page = a.getAttribute('data-page');
@@ -166,7 +176,7 @@ function mostrarDashboard(root = document) {
   const dashboard = $('#empresa-dashboard', root);
   if (!dashboard) return;
 
-  // Actualiza el nombre visible de la empresa en el header (si existe)
+  // Actualiza el nombre visible de la empresa
   const nombreSpan = $('#empresa-nombre', root);
   if (nombreSpan && empresaAutenticada?.nombre) {
     nombreSpan.textContent = empresaAutenticada.nombre;
@@ -179,7 +189,6 @@ function mostrarDashboard(root = document) {
   dashboard.classList.remove('hidden');
   dashboard.style.display = 'block';
 
-  // Añadir Logout si no existe
   if (!$('#btn-logout', dashboard)) {
     const header = $('.dashboard-header', dashboard) || dashboard;
     const btnLogout = document.createElement('button');
@@ -233,7 +242,6 @@ function initDashboard(root = document) {
   const dashboardContent = $('#dashboard-content', root);
   if (!dashboard) return;
 
-  // Delegación: sirve para botones que aparecen tras cargar parciales
   dashboard.addEventListener('click', async (e) => {
     const btn = e.target.closest('.dashboard-tabs button');
     if (!btn) return;
@@ -244,11 +252,22 @@ function initDashboard(root = document) {
       if (!res.ok) throw new Error('No se pudo cargar la página.');
       const html = await res.text();
       dashboardContent.innerHTML = html;
-      initComponents(dashboardContent); // re-activar scripts dentro del parcial
+      initComponents(dashboardContent);
+
+      // Si es ACTIVIDAD, cargar scripts necesarios
+      if (page.endsWith('actividad.html')) {
+        try {
+          if (!window.NS_EMPLEADOS) {
+            await loadScript('data/empleados.js');
+          }
+          await loadScript('data/renderActividad.js');
+        } catch (e) {
+          console.error(e);
+        }
+      }
     } catch (err) {
       dashboardContent.innerHTML = '<p>Error al cargar el contenido.</p>';
       console.error(err);
     }
   });
 }
-
