@@ -1,5 +1,5 @@
 // ============================
-// NanaSync - script.js (completo)
+// NanaSync - script.js (COMPLETO, actualizado)
 // ============================
 
 // 🔗 Backend
@@ -13,7 +13,7 @@ function enviarLog(level, message, context = null) {
     else if (level === "warn") console.warn(tag, context || "");
     else console.info(tag, context || "");
   } catch (_) {}
-  // Enviar a Render (no rompe si falla)
+  // Enviar a Render (ignora fallo)
   fetch(`${API_BASE}/api/log`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -85,7 +85,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let page = link.getAttribute("data-page");
         enviarLog("info", "NAV -> click", { page });
-
         if (!page) return;
         if (!page.endsWith(".html")) page += ".html";
 
@@ -126,7 +125,8 @@ function inicializarComponentes() {
   initRegistroEmpresa();
   initLoginEmpresa();
   initAltaEmpleado();
-  initLoginEmpleado(); // si estamos en empleados.html
+  initLoginEmpleado();     // empleados.html
+  initEmpleadosTab();      // pestaña EMPLEADOS dentro de empresas.html
 }
 
 // ============================
@@ -229,6 +229,10 @@ function initDashboardTabs() {
         if (!response.ok) throw new Error("No se pudo cargar la página.");
         const html = await response.text();
         dashboardContent.innerHTML = html;
+
+        // modo visual correcto para el tab de empleados (quita centrado/verde)
+        dashboardContent.classList.add("empleados-mode");
+
         inicializarComponentes(); // re-bind en parcial
       } catch (err) {
         enviarLog("error", "Dashboard parcial error", { page, error: err.message });
@@ -469,26 +473,29 @@ function initLoginEmpleado() {
   }
 }
 
-// === EMPLEADOS (pestaña dentro de empresas.html) ===
+// ============================
+// Pestaña EMPLEADOS (dentro de empresas.html)
+// ============================
 async function initEmpleadosTab() {
   const grid = document.getElementById("emp-grid");
-  if (!grid) return; // no estamos en el parcial
+  if (!grid) return;
+
+  // Modo visual correcto: desactiva centrado/verde del dashboard-content
+  const dc = document.getElementById("dashboard-content");
+  dc?.classList.add("empleados-mode");
 
   const qInput = document.getElementById("emp-q");
   const btnRefresh = document.getElementById("emp-refresh");
   const summary = document.getElementById("emp-summary");
   const empty = document.getElementById("emp-empty");
 
-  const empresa = (window.empresaAutenticada && (window.empresaAutenticada._id || window.empresaAutenticada.id))
-    || (JSON.parse(localStorage.getItem("empresaAutenticada") || "null")?._id
-        || JSON.parse(localStorage.getItem("empresaAutenticada") || "null")?.id);
+  const empresaStore = JSON.parse(localStorage.getItem("empresaAutenticada") || "null");
+  const empresaId = empresaStore?._id || empresaStore?.id;
 
-  if (!empresa) {
+  if (!empresaId) {
     grid.innerHTML = "";
-    if (empty) {
-      empty.classList.remove("hidden");
-      empty.textContent = "Inicia sesión como empresa para ver la plantilla.";
-    }
+    empty?.classList.remove("hidden");
+    empty && (empty.textContent = "Inicia sesión como empresa para ver la plantilla.");
     return;
   }
 
@@ -499,28 +506,18 @@ async function initEmpleadosTab() {
     try {
       const q = (qInput?.value || "").trim();
       const url = new URL(`${API_BASE}/api/empleados`);
-      url.searchParams.set("empresaId", empresa);
+      url.searchParams.set("empresaId", empresaId);
       url.searchParams.set("page", String(page));
       url.searchParams.set("limit", String(limit));
       if (q) url.searchParams.set("q", q);
 
-      enviarLog("info", "GET /api/empleados", {empresaId: empresa, q, page, limit});
       const res = await fetch(url.toString());
       const data = await res.json();
+      const items = data?.items ?? (Array.isArray(data) ? data : []);
 
-      if (!res.ok) {
-        grid.innerHTML = "";
-        if (empty) {
-          empty.classList.remove("hidden");
-          empty.textContent = "Error cargando empleados.";
-        }
-        return;
-      }
-
-      const items = Array.isArray(data.items) ? data.items : Array.isArray(data) ? data : [];
       if (summary) {
-        const total = data.total ?? items.length;
-        summary.textContent = `Total: ${total}${data.page ? ` · Página ${data.page}` : ""}`;
+        const total = data?.total ?? items.length;
+        summary.textContent = `Total: ${total}${data?.page ? ` · Página ${data.page}` : ""}`;
       }
 
       if (!items.length) {
@@ -534,51 +531,41 @@ async function initEmpleadosTab() {
     } catch (err) {
       enviarLog("error", "Listar empleados error", { error: err.message });
       grid.innerHTML = "";
-      if (empty) {
-        empty.classList.remove("hidden");
-        empty.textContent = "No se pudo cargar la lista.";
-      }
+      empty?.classList.remove("hidden");
+      empty && (empty.textContent = "No se pudo cargar la lista.");
     }
   };
 
-  const cardEmpleadoHTML = (emp) => {
-    const on = `<span class="estado" style="background:#22c55e;"></span>`;
-    const off = `<span class="estado" style="background:#ef4444;"></span>`;
-    const estado = (String(emp.estadoConexion || "").toLowerCase() === "activo") ? on : off;
-
-    const entrada = emp?.horario?.entrada || "--:--";
-    const salida = emp?.horario?.salida || "--:--";
-
-    return `
-      <div class="empleado-card" style="background:#0f172a;color:#e5e7eb;border:2px solid #000;border-radius:20px;padding:12px;position:relative;">
-        <div class="estado-header">
-          <div class="foto-placeholder" style="background:#111;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:.8rem;">Foto</div>
-          ${estado}
-        </div>
-        <div style="margin-top:10px;line-height:1.3;">
-          <div style="font-weight:700;">${(emp.usuario || "").toLowerCase()}</div>
-          <div>${emp.puesto || "-"}</div>
-          <div style="opacity:.8;">${emp.rango || "-"}</div>
-          <div style="opacity:.8;">H: ${entrada} - ${salida}</div>
-        </div>
-        <div style="margin-top:10px;">
-          <button class="btn btn-secondary" data-admin="${emp._id}">Administrar</button>
-        </div>
-      </div>
-    `;
-  };
-
-  // Eventos
   qInput?.addEventListener("input", debounce(fetchAndRender, 250));
   btnRefresh?.addEventListener("click", fetchAndRender);
-
-  // Primera carga
   fetchAndRender();
 }
 
-// Debounce utilitario
+function cardEmpleadoHTML(emp) {
+  const activo = String(emp.estadoConexion || "").toLowerCase() === "activo";
+  const estadoColor = activo ? "#22c55e" : "#ef4444";
+  const entrada = emp?.horario?.entrada || "--:--";
+  const salida  = emp?.horario?.salida  || "--:--";
+  const usuario = (emp.usuario || "").toLowerCase();
+
+  return `
+    <div class="empleado-card">
+      <span class="estado-dot" style="background:${estadoColor};"></span>
+      <div class="estado-header">
+        <div class="foto-placeholder">Foto de<br/>Perfil</div>
+      </div>
+      <div class="emp-datos">
+        <div class="emp-usuario">${usuario}</div>
+        <div>${emp.puesto || "-"}</div>
+        <div class="emp-meta">${emp.rango || "-"}</div>
+        <div class="emp-meta">H: ${entrada} - ${salida}</div>
+      </div>
+      <div class="emp-actions">
+        <button class="btn btn-secondary" data-admin="${emp._id}">Administrar</button>
+      </div>
+    </div>
+  `;
+}
+
+// util
 function debounce(fn, ms=300){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
-
-// ⚠️ Asegúrate de llamar a initEmpleadosTab() dentro de inicializarComponentes()
-
-
