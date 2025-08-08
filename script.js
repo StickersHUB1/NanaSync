@@ -166,6 +166,12 @@ function mostrarDashboard(root = document) {
   const dashboard = $('#empresa-dashboard', root);
   if (!dashboard) return;
 
+  // Actualiza el nombre visible de la empresa en el header (si existe)
+  const nombreSpan = $('#empresa-nombre', root);
+  if (nombreSpan && empresaAutenticada?.nombre) {
+    nombreSpan.textContent = empresaAutenticada.nombre;
+  }
+
   $('.empresa-auth-cta', root)?.classList.add('hidden');
   $('.empresa-intro', root)?.classList.add('hidden');
   $('.empresa-subscription', root)?.classList.add('hidden');
@@ -245,3 +251,4 @@ function initDashboard(root = document) {
     }
   });
 }
+
