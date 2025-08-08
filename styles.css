@@ -191,15 +191,18 @@ button.btn-secondary:hover { background-color:rgba(255,255,255,.2); }
 }
 
 /* TARJETA */
-.dashboard-content .empleado-card{
-  position: relative;
-  display: flex; align-items: center; gap:16px;
-  padding: 16px 20px;
-  background: #0f1b2d;              /* azul muy oscuro */
-  color: #e5e7eb;
-  border: 2px solid #0b0f16;        /* borde oscuro visible */
-  border-radius: 18px;
-  box-shadow: 0 6px 10px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);
+.dashboard-content .empleado-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: #0f172a;
+    color: #e5e7eb;
+    border: 2px solid #000;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, .2);
+    width: max-content;
 }
 
 /* dot estado */
@@ -235,6 +238,7 @@ button.btn-secondary:hover { background-color:rgba(255,255,255,.2); }
 .empleado-card .emp-actions .btn:hover{
   background: rgba(255,255,255,.12);
 }
+
 
 
 
