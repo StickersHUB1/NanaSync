@@ -1,273 +1,137 @@
-// script.js (module)
-const API_BASE = 'https://nanasync-backend.onrender.com/api';
+// ✅ script.js – NanaSync Frontend Core
+const API_URL = "https://nanasyncbackend.onrender.com"; // 🔹 URL correcta del backend en Render
 
-// --- Estado persistente ---
-let empresaAutenticada = (() => {
-  try { return JSON.parse(localStorage.getItem('empresaAutenticada')) || null; }
-  catch { return null; }
-})();
-
-const saveEmpresa = (emp) => {
-  empresaAutenticada = emp;
-  localStorage.setItem('empresaAutenticada', JSON.stringify(emp));
-};
-const clearEmpresa = () => {
-  empresaAutenticada = null;
-  localStorage.removeItem('empresaAutenticada');
-};
-
-// --- Utilidades ---
+// 📌 Helper para seleccionar elementos
 const $ = (sel, root = document) => root.querySelector(sel);
-const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-async function api(path, opts = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
-    ...opts
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'Error de servidor');
-  return data;
+// 📌 Guardar y obtener empresa autenticada
+function setEmpresaAutenticada(data) {
+  localStorage.setItem("empresaAutenticada", JSON.stringify(data));
+}
+function getEmpresaAutenticada() {
+  return JSON.parse(localStorage.getItem("empresaAutenticada"));
 }
 
-async function fetchPage(page) {
-  const main = $('#main-content');
-  if (!main) return;
+// 📌 Registrar empresa
+const formRegistro = document.getElementById("form-registro-empresa");
+formRegistro?.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-  const url = page?.endsWith('.html') ? page : `${page}.html`;
-  const res = await fetch(url, { cache: 'no-cache' });
-  if (!res.ok) throw new Error(`No se pudo cargar ${url}`);
-  const html = await res.text();
-  main.innerHTML = html;
-  initComponents(main);
-  main.scrollTo?.(0, 0);
-}
+  const nombre = $("#nombre").value.trim();
+  const email = $("#email").value.trim();
+  const password = $("#password").value.trim();
 
-// Carga dinámica de scripts externos
-async function loadScript(url) {
-  await new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = url;
-    s.onload = resolve;
-    s.onerror = () => reject(new Error(`No se pudo cargar ${url}`));
-    document.head.appendChild(s);
-  });
-}
+  try {
+    const res = await fetch(`${API_URL}/api/empresas`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre, email, password })
+    });
 
-// --- Inicialización de listeners globales ---
-document.addEventListener('DOMContentLoaded', () => {
-  // Delegación de clicks del sidebar y CTA
-  document.body.addEventListener('click', async (e) => {
-    const a = e.target.closest('a');
-    if (!a) return;
-
-    // CTA Solicitar -> abre modal login/registro si existe
-    if (a.id === 'cta-solicitar') {
-      e.preventDefault();
-      const btnOpen = document.getElementById('btn-open-registro') || document.getElementById('btn-open-login');
-      if (btnOpen) btnOpen.click();
-      else await fetchPage('empresas.html');
+    const data = await res.json();
+    if (!res.ok) {
+      alert(`❌ Error: ${data.error}`);
       return;
     }
 
-    // Navegación SPA-lite
-    if (a.matches('.sidebar-nav a,[data-page]')) {
-      e.preventDefault();
-      if (a.hasAttribute('data-home')) {
-        window.location.hash = '';
-        window.location.reload();
-        return;
-      }
-      const page = a.getAttribute('data-page');
-      if (page) {
-        try { await fetchPage(page); }
-        catch (err) { console.error(err); $('#main-content').innerHTML = `<p>Error al cargar el contenido.</p>`; }
-      }
-    }
-  });
-
-  // Bootstrap inicial
-  initComponents(document);
+    alert("✅ Empresa registrada correctamente.");
+    $("#modal-auth").style.display = "none";
+  } catch (err) {
+    console.error("Error registrando empresa:", err);
+    alert("❌ Error de red");
+  }
 });
 
-// --- Componentes que viven dentro de páginas parciales ---
-function initComponents(root) {
-  initModalesAuth(root);
-  initDashboard(root);
+// 📌 Login empresa
+const formLogin = document.getElementById("form-login-empresa");
+formLogin?.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-  // Formularios auth
-  const formRegistro = $('#form-registro-empresa', root);
-  formRegistro?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const nombre = $('#nombre').value.trim();
-    const email = $('#email').value.trim();
-    const password = $('#password').value;
+  const email = $("#login-email").value.trim();
+  const password = $("#login-password").value.trim();
 
-    try {
-      const data = await api('/empresas', { method: 'POST', body: JSON.stringify({ nombre, email, password }) });
-      saveEmpresa({ id: data._id, nombre: data.nombre, email: data.email });
-      alert('✅ Empresa registrada correctamente.');
-      $('#modal-auth')?.style && ($('#modal-auth').style.display = 'none');
-      mostrarDashboard(root);
-    } catch (err) {
-      console.error('Error registrando empresa:', err);
-      alert(`❌ ${err.message}`);
-    }
-  });
+  try {
+    const res = await fetch(`${API_URL}/api/login-empresa`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
 
-  const formLogin = $('#form-login-empresa', root);
-  formLogin?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = $('#login-email').value.trim();
-    const password = $('#login-password').value;
-
-    try {
-      const data = await api('/login-empresa', { method: 'POST', body: JSON.stringify({ email, password }) });
-      saveEmpresa({ id: data._id, nombre: data.nombre, email: data.email });
-      alert('✅ Sesión iniciada correctamente.');
-      $('#modal-auth')?.style && ($('#modal-auth').style.display = 'none');
-      mostrarDashboard(root);
-    } catch (err) {
-      console.error('Error en login:', err);
-      alert(`❌ ${err.message}`);
-    }
-  });
-
-  const formEmpleado = $('#form-nuevo-empleado', root);
-  formEmpleado?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!empresaAutenticada?.id) {
-      alert('⚠️ Debes estar logueado como empresa para añadir empleados.');
+    const data = await res.json();
+    if (!res.ok) {
+      alert(`❌ Error: ${data.error}`);
       return;
     }
-    const f = e.target;
-    const datos = {
-      nombre: f.nombre.value.trim(),
-      edad: Number(f.edad.value),
-      puesto: f.puesto.value.trim(),
-      rango: f.rango.value.trim(),
-      horario: { entrada: f.entrada.value, salida: f.salida.value },
-      rol: 'empleado',
-      estadoConexion: 'inactivo',
-      fichado: false,
-      ultimoFichaje: new Date().toISOString(),
-      empresaId: empresaAutenticada.id
-    };
 
-    try {
-      await api('/empleados', { method: 'POST', body: JSON.stringify(datos) });
-      const out = document.getElementById('respuesta-empleado');
-      if (out) out.innerText = '✅ Empleado añadido correctamente';
-      f.reset?.();
-    } catch (err) {
-      console.error(err);
-      const out = document.getElementById('respuesta-empleado');
-      if (out) out.innerText = `❌ ${err.message}`;
-    }
-  });
-
-  // Autologin -> mostrar dashboard
-  if (empresaAutenticada && $('#empresa-dashboard', root)) {
-    mostrarDashboard(root);
+    // Guarda empresa en localStorage y muestra dashboard
+    setEmpresaAutenticada(data);
+    alert(`✅ Bienvenido ${data.nombre}`);
+    mostrarDashboard();
+  } catch (err) {
+    console.error("Error iniciando sesión:", err);
+    alert("❌ Error de red");
   }
-}
+});
 
+// 📌 Mostrar dashboard de empresa
 function mostrarDashboard(root = document) {
-  const dashboard = $('#empresa-dashboard', root);
-  if (!dashboard) return;
+  const empresa = getEmpresaAutenticada();
+  if (!empresa) return;
 
-  // Actualiza el nombre visible de la empresa
-  const nombreSpan = $('#empresa-nombre', root);
-  if (nombreSpan && empresaAutenticada?.nombre) {
-    nombreSpan.textContent = empresaAutenticada.nombre;
+  const nombreSpan = document.getElementById("empresa-nombre");
+  if (nombreSpan) nombreSpan.textContent = empresa.nombre;
+
+  $(".empresa-auth-cta", root)?.classList.add("hidden");
+  $(".empresa-intro", root)?.classList.add("hidden");
+  $(".empresa-subscription", root)?.classList.add("hidden");
+
+  const dashboard = $("#empresa-dashboard", root);
+  if (dashboard) {
+    dashboard.classList.remove("hidden");
+    dashboard.style.display = "block";
+  }
+}
+
+// 📌 Añadir empleado
+const formEmpleado = document.getElementById("form-nuevo-empleado");
+formEmpleado?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const empresa = getEmpresaAutenticada();
+  if (!empresa) {
+    alert("❌ Debes iniciar sesión primero.");
+    return;
   }
 
-  $('.empresa-auth-cta', root)?.classList.add('hidden');
-  $('.empresa-intro', root)?.classList.add('hidden');
-  $('.empresa-subscription', root)?.classList.add('hidden');
+  const datos = {
+    nombre: e.target.nombre.value.trim(),
+    edad: parseInt(e.target.edad.value, 10),
+    puesto: e.target.puesto.value.trim(),
+    rango: e.target.rango.value.trim(),
+    horario: {
+      entrada: e.target.entrada.value,
+      salida: e.target.salida.value
+    },
+    empresaId: empresa._id
+  };
 
-  dashboard.classList.remove('hidden');
-  dashboard.style.display = 'block';
-
-  if (!$('#btn-logout', dashboard)) {
-    const header = $('.dashboard-header', dashboard) || dashboard;
-    const btnLogout = document.createElement('button');
-    btnLogout.textContent = 'Cerrar sesión';
-    btnLogout.className = 'btn btn-secondary';
-    btnLogout.id = 'btn-logout';
-    btnLogout.addEventListener('click', () => {
-      clearEmpresa();
-      $('.empresa-auth-cta')?.classList.remove('hidden');
-      $('.empresa-intro')?.classList.remove('hidden');
-      $('.empresa-subscription')?.classList.remove('hidden');
-      dashboard.classList.add('hidden');
-      dashboard.style.display = 'none';
-      btnLogout.remove();
+  try {
+    const res = await fetch(`${API_URL}/api/empleados`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(datos)
     });
-    header.appendChild(btnLogout);
-  }
-}
 
-function initModalesAuth(root = document) {
-  const modal = $('#modal-auth', root);
-  const btnOpenRegistro = $('#btn-open-registro', root);
-  const btnOpenLogin = $('#btn-open-login', root);
-  const btnCloseModal = $('#btn-close-modal', root);
-  const formRegistro = $('#form-registro-empresa', root);
-  const formLogin = $('#form-login-empresa', root);
-
-  if (!(modal && btnOpenRegistro && btnOpenLogin && btnCloseModal && formRegistro && formLogin)) return;
-
-  btnOpenRegistro.addEventListener('click', () => {
-    modal.style.display = 'flex';
-    formRegistro.style.display = 'flex';
-    formLogin.style.display = 'none';
-  });
-
-  btnOpenLogin.addEventListener('click', () => {
-    modal.style.display = 'flex';
-    formLogin.style.display = 'flex';
-    formRegistro.style.display = 'none';
-  });
-
-  btnCloseModal.addEventListener('click', () => {
-    modal.style.display = 'none';
-    formLogin.style.display = 'none';
-    formRegistro.style.display = 'none';
-  });
-}
-
-function initDashboard(root = document) {
-  const dashboard = $('#empresa-dashboard', root);
-  const dashboardContent = $('#dashboard-content', root);
-  if (!dashboard) return;
-
-  dashboard.addEventListener('click', async (e) => {
-    const btn = e.target.closest('.dashboard-tabs button');
-    if (!btn) return;
-    const page = btn.getAttribute('data-page');
-    if (!page || !dashboardContent) return;
-    try {
-      const res = await fetch(page, { cache: 'no-cache' });
-      if (!res.ok) throw new Error('No se pudo cargar la página.');
-      const html = await res.text();
-      dashboardContent.innerHTML = html;
-      initComponents(dashboardContent);
-
-      // Si es ACTIVIDAD, cargar scripts necesarios
-      if (page.endsWith('actividad.html')) {
-        try {
-          if (!window.NS_EMPLEADOS) {
-            await loadScript('data/empleados.js');
-          }
-          await loadScript('data/renderActividad.js');
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    } catch (err) {
-      dashboardContent.innerHTML = '<p>Error al cargar el contenido.</p>';
-      console.error(err);
+    const data = await res.json();
+    if (!res.ok) {
+      alert(`❌ Error: ${data.error}`);
+      return;
     }
-  });
-}
+
+    alert(`✅ Empleado ${data.nombre} añadido correctamente`);
+    e.target.reset();
+  } catch (err) {
+    console.error("Error registrando empleado:", err);
+    alert("❌ Error de red");
+  }
+});
