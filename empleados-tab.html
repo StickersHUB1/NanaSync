@@ -1,0 +1,17 @@
+<section class="glass-box">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px;flex-wrap:wrap;">
+    <h3>Plantilla de la empresa</h3>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input id="emp-q" type="text" placeholder="Buscar por nombre o puesto…" style="padding:8px 10px;border-radius:8px;border:1px solid #333;background:#111;color:#fff;min-width:220px;">
+      <button id="emp-refresh" class="btn btn-secondary">Actualizar</button>
+    </div>
+  </div>
+
+  <div id="emp-summary" style="margin-bottom:10px;color:#9ca3af;"></div>
+
+  <div id="emp-grid" class="grid-empleados"></div>
+
+  <div id="emp-empty" class="hidden" style="text-align:center;color:#9ca3af;margin-top:20px;">
+    No hay empleados para mostrar.
+  </div>
+</section>
