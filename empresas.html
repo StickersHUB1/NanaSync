@@ -63,18 +63,21 @@
 
   <!-- ✅ DASHBOARD EMPRESA -->
   <section class="empresa-dashboard glass-box hidden" id="empresa-dashboard">
-    <div class="dashboard-header">
-      <h2><span id="empresa-nombre">Empresa</span></h2>
-      <h3>DASHBOARD</h3>
-    </div>
+<div class="dashboard-header">
+  <div class="empresa-brand">
+    <img id="empresa-logo" src="assets/images/feature-tools.png" alt="Logo empresa" />
+    <h2 id="empresa-nombre">Empresa</h2>
+  </div>
+  <h3>DASHBOARD</h3>
+</div>
 
-    <div class="dashboard-tabs">
-      <!-- Añadimos data-page para que el loader SPA cargue los parciales -->
-      <button data-tab="empleados" data-page="empleados-tab.html">EMPLEADOS</button>
-      <button data-tab="actividad" data-page="actividad.html">ACTIVIDAD</button>
-      <button data-tab="monitorizar" data-page="monitorizar.html">MONITORIZAR</button>
-      <button data-tab="gestion" data-page="gestion.html">GESTIÓN</button>
-    </div>
+<div class="dashboard-tabs">
+  <button data-tab="empleados" data-page="empleados-tab.html">EMPLEADOS</button>
+  <button data-tab="actividad" data-page="actividad.html">ACTIVIDAD</button>
+  <button data-tab="monitorizar" data-page="monitorizar.html">MONITORIZAR</button>
+  <button data-tab="gestion" data-page="gestion.html">GESTIÓN</button>
+  <button data-tab="ajustes" data-page="ajustes.html">AJUSTES</button>
+</div>
 
     <div class="dashboard-content" id="dashboard-content">
       <p>Selecciona una pestaña para ver el contenido.</p>
@@ -82,4 +85,5 @@
   </section>
 
 </section>
+
 
