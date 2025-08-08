@@ -1,7 +1,19 @@
 <section class="glass-box">
-  <h2>Gestión de Empleados</h2>
-  <p>Aquí irán los módulos relacionados con la plantilla, usuarios y permisos.</p>
+  <h2>Acceso Empleado</h2>
 
-  <!-- contenedor opcional para listar empleados estáticos o desde backend -->
-  <div class="grid-empleados" id="empleados-grid"></div>
+  <form id="form-login-empleado" class="auth-form" autocomplete="off" style="margin-top:1rem;">
+    <label for="emp-usuario">Usuario</label>
+    <input type="text" id="emp-usuario" name="usuario" required autocomplete="username" />
+
+    <label for="emp-password">Contraseña</label>
+    <input type="password" id="emp-password" name="password" required autocomplete="current-password" />
+
+    <button type="submit" class="btn">Entrar</button>
+  </form>
+
+  <div id="empleado-dashboard" class="glass-box hidden" style="margin-top:1.5rem;">
+    <h3>Mi Perfil</h3>
+    <div id="empleado-perfil" style="margin-top:10px; line-height:1.6;"></div>
+    <button id="btn-logout-empleado" class="btn btn-secondary" style="margin-top:12px;">Cerrar sesión</button>
+  </div>
 </section>
