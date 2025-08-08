@@ -1,19 +1,19 @@
 // ============================
-// Config
+// NanaSync - script.js (completo)
 // ============================
+
+// 🔗 Backend
 const API_BASE = "https://nanasyncbackend.onrender.com";
 
-// ============================
-// Logger (navegador + Render)
-// ============================
+// 🪵 Logger (navegador + Render)
 function enviarLog(level, message, context = null) {
-  // Consola del navegador
   const tag = `[${level.toUpperCase()}] ${message}`;
-  if (level === "error") console.error(tag, context || "");
-  else if (level === "warn") console.warn(tag, context || "");
-  else console.info(tag, context || "");
-
-  // Enviar a Render (ignora fallo)
+  try {
+    if (level === "error") console.error(tag, context || "");
+    else if (level === "warn") console.warn(tag, context || "");
+    else console.info(tag, context || "");
+  } catch (_) {}
+  // Enviar a Render (no rompe si falla)
   fetch(`${API_BASE}/api/log`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -21,24 +21,25 @@ function enviarLog(level, message, context = null) {
   }).catch(() => {});
 }
 
-// ============================
-// Utilidades DOM / Estado
-// ============================
-const $ = (sel, root = document) => root.querySelector(sel);
+// 🧠 Estado (empresa/empleado)
+let empresaAutenticada = null;
 
-function setEmpresaAutenticada(obj) {
-  localStorage.setItem("empresaAutenticada", JSON.stringify(obj));
-  enviarLog("info", "empresaAutenticada guardada", obj);
+function setEmpresaAutenticada(data) {
+  empresaAutenticada = data ? { id: data._id || data.id, _id: data._id || data.id, nombre: data.nombre, email: data.email } : null;
+  localStorage.setItem("empresaAutenticada", JSON.stringify(empresaAutenticada));
+  enviarLog("info", "empresaAutenticada guardada", empresaAutenticada);
 }
-function getEmpresaAutenticada() {
+function restoreEmpresaAutenticada() {
   try {
     const raw = localStorage.getItem("empresaAutenticada");
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      empresaAutenticada = parsed ? { id: parsed._id || parsed.id, _id: parsed._id || parsed.id, nombre: parsed.nombre, email: parsed.email } : null;
+    }
+  } catch (_) {}
 }
 function clearEmpresaAutenticada() {
+  empresaAutenticada = null;
   localStorage.removeItem("empresaAutenticada");
   enviarLog("info", "empresaAutenticada limpiada");
 }
@@ -51,70 +52,74 @@ function getEmpleadoAutenticado() {
   try {
     const raw = localStorage.getItem("empleadoAutenticado");
     return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 function clearEmpleadoAutenticado() {
   localStorage.removeItem("empleadoAutenticado");
   enviarLog("info", "empleadoAutenticado limpiado");
 }
 
+// 🧰 DOM helper
+const $ = (sel, root = document) => root.querySelector(sel);
+
 // ============================
-// SPA / Navegación
+// SPA
 // ============================
 document.addEventListener("DOMContentLoaded", () => {
-  enviarLog("info", "DOM cargado - inicializando app");
+  enviarLog("info", "DOM cargado - init");
+  restoreEmpresaAutenticada();
+
   const links = document.querySelectorAll(".sidebar-nav a");
   const main = document.getElementById("main-content");
 
-  async function cargarPagina(page) {
-    try {
-      enviarLog("info", "SPA cargarPagina", { page });
-      if (!page.endsWith(".html")) page += ".html";
-      const res = await fetch(page, { cache: "no-cache" });
-      if (!res.ok) throw new Error(`No se pudo cargar ${page}`);
-      const html = await res.text();
-      main.innerHTML = html;
-
-      // Re-enlazar eventos de la vista cargada
-      inicializarComponentes();
-
-      // Si volvemos a empresas y ya hay sesión empresa, muestra dashboard
-      if (page === "empresas.html" && getEmpresaAutenticada()) {
-        mostrarDashboard();
-      }
-      main.scrollTo?.(0, 0);
-    } catch (err) {
-      enviarLog("error", "SPA error cargando página", { page, error: err.message });
-      main.innerHTML = `<p>Error al cargar el contenido.</p>`;
-    }
-  }
-
-  function activarNavegacion() {
+  const activarNavegacion = () => {
     links.forEach((link) => {
-      link.addEventListener("click", (e) => {
+      link.addEventListener("click", async (e) => {
         e.preventDefault();
+
         if (link.hasAttribute("data-home")) {
-          enviarLog("info", "SPA home -> reload");
+          enviarLog("info", "NAV -> home reload");
           location.reload();
           return;
         }
-        const page = link.getAttribute("data-page");
-        if (page) cargarPagina(page);
+
+        let page = link.getAttribute("data-page");
+        enviarLog("info", "NAV -> click", { page });
+
+        if (!page) return;
+        if (!page.endsWith(".html")) page += ".html";
+
+        try {
+          enviarLog("info", "SPA fetch", { page });
+          const response = await fetch(page, { cache: "no-cache" });
+          if (!response.ok) throw new Error("No se pudo cargar la página.");
+          const html = await response.text();
+          main.innerHTML = html;
+
+          inicializarComponentes();
+
+          if (page === "empresas.html" && empresaAutenticada) {
+            mostrarDashboard();
+          }
+
+          main.scrollTo?.(0, 0);
+        } catch (err) {
+          enviarLog("error", "SPA error cargando", { page, error: err.message });
+          main.innerHTML = `<p>Error al cargar el contenido.</p>`;
+        }
       });
     });
-  }
+  };
 
   activarNavegacion();
-  inicializarComponentes(); // inicial para la home
+  inicializarComponentes(); // primera vista (home)
 });
 
 // ============================
-// Inicialización de vistas (se llama tras cada carga)
+// Inicialización por vista
 // ============================
 function inicializarComponentes() {
-  enviarLog("info", "Inicializando componentes de la vista actual");
+  enviarLog("info", "Init componentes vista");
 
   initModalesAuth();
   initDashboardTabs();
@@ -125,7 +130,7 @@ function inicializarComponentes() {
 }
 
 // ============================
-// Modales Auth (empresa)
+// Modales (registro/login empresa)
 // ============================
 function initModalesAuth() {
   const modal = $("#modal-auth");
@@ -136,73 +141,67 @@ function initModalesAuth() {
   const formRegistro = $("#form-registro-empresa");
   const formLogin = $("#form-login-empresa");
 
-  if (!modal) return; // vista no tiene modal
+  if (!modal) return;
 
   if (btnOpenRegistro) {
     btnOpenRegistro.onclick = () => {
-      enviarLog("info", "Abrir modal REGISTRO");
+      enviarLog("info", "Modal -> abrir REGISTRO");
       modal.style.display = "flex";
-      if (formRegistro) formRegistro.style.display = "flex";
-      if (formLogin) formLogin.style.display = "none";
+      formRegistro && (formRegistro.style.display = "flex");
+      formLogin && (formLogin.style.display = "none");
     };
   }
   if (btnOpenLogin) {
     btnOpenLogin.onclick = () => {
-      enviarLog("info", "Abrir modal LOGIN");
+      enviarLog("info", "Modal -> abrir LOGIN");
       modal.style.display = "flex";
-      if (formLogin) formLogin.style.display = "flex";
-      if (formRegistro) formRegistro.style.display = "none";
+      formLogin && (formLogin.style.display = "flex");
+      formRegistro && (formRegistro.style.display = "none");
     };
   }
   if (btnCloseModal) {
     btnCloseModal.onclick = () => {
-      enviarLog("info", "Cerrar modal AUTH");
+      enviarLog("info", "Modal -> cerrar AUTH");
       modal.style.display = "none";
-      if (formLogin) formLogin.style.display = "none";
-      if (formRegistro) formRegistro.style.display = "none";
+      formLogin && (formLogin.style.display = "none");
+      formRegistro && (formRegistro.style.display = "none");
     };
   }
 }
 
 // ============================
-// Dashboard Empresa (mostrar sección)
+// Dashboard Empresa (mostrar)
 // ============================
 function mostrarDashboard(root = document) {
-  const empresa = getEmpresaAutenticada();
-  if (!empresa) return;
+  enviarLog("info", "Mostrar dashboard empresa");
+  const dashboard = $("#empresa-dashboard");
+  const sectionAuth = $(".empresa-auth-cta");
+  const sectionIntro = $(".empresa-intro");
+  const sectionSubscription = $(".empresa-subscription");
 
-  const nombreSpan = $("#empresa-nombre", root);
-  if (nombreSpan) nombreSpan.textContent = empresa.nombre;
+  if (!dashboard) return;
 
-  [".empresa-auth-cta", ".empresa-intro", ".empresa-subscription"].forEach((sel) => {
-    const el = $(sel, root);
-    if (el) el.classList.add("hidden");
-  });
+  sectionAuth?.classList.add("hidden");
+  sectionIntro?.classList.add("hidden");
+  sectionSubscription?.classList.add("hidden");
 
-  const dashboard = $("#empresa-dashboard", root);
-  if (dashboard) {
-    dashboard.classList.remove("hidden");
-    dashboard.style.display = "block";
-  }
+  dashboard.classList.remove("hidden");
+  dashboard.style.display = "block";
 
-  // Botón logout único
-  if (!$("#btn-logout", dashboard)) {
-    const header = dashboard?.querySelector(".dashboard-header") || dashboard;
+  if (!document.getElementById("btn-logout")) {
+    const header = dashboard.querySelector(".dashboard-header");
     const btnLogout = document.createElement("button");
-    btnLogout.id = "btn-logout";
-    btnLogout.className = "btn btn-secondary";
     btnLogout.textContent = "Cerrar sesión";
+    btnLogout.className = "btn btn-secondary";
+    btnLogout.id = "btn-logout";
     btnLogout.addEventListener("click", () => {
-      enviarLog("info", "Logout empresa");
+      enviarLog("info", "Empresa -> logout");
       clearEmpresaAutenticada();
-      [".empresa-auth-cta", ".empresa-intro", ".empresa-subscription"].forEach((sel) => {
-        const el = $(sel);
-        if (el) el.classList.remove("hidden");
-      });
-      if (dashboard) {
-        dashboard.classList.add("hidden");
-        dashboard.style.display = "none";
-      }
+      sectionAuth?.classList.remove("hidden");
+      sectionIntro?.classList.remove("hidden");
+      sectionSubscription?.classList.remove("hidden");
+      dashboard.classList.add("hidden");
+      dashboard.style.display = "none";
       btnLogout.remove();
     });
     header?.appendChild(btnLogout);
@@ -215,21 +214,24 @@ function mostrarDashboard(root = document) {
 function initDashboardTabs() {
   const dashboard = $("#empresa-dashboard");
   const dashboardContent = $("#dashboard-content");
+
   if (!dashboard) return;
 
-  dashboard.querySelectorAll(".dashboard-tabs button").forEach((btn) => {
+  const tabButtons = dashboard.querySelectorAll(".dashboard-tabs button");
+  tabButtons.forEach((btn) => {
     btn.addEventListener("click", async () => {
       const page = btn.getAttribute("data-page");
+      enviarLog("info", "Dashboard tab", { page });
       if (!page || !dashboardContent) return;
+
       try {
-        enviarLog("info", "Dashboard tab click", { page });
-        const res = await fetch(page, { cache: "no-cache" });
-        if (!res.ok) throw new Error("No se pudo cargar la página.");
-        const html = await res.text();
+        const response = await fetch(page, { cache: "no-cache" });
+        if (!response.ok) throw new Error("No se pudo cargar la página.");
+        const html = await response.text();
         dashboardContent.innerHTML = html;
-        inicializarComponentes(); // rebind en el parcial
+        inicializarComponentes(); // re-bind en parcial
       } catch (err) {
-        enviarLog("error", "Error cargando parcial dashboard", { page, error: err.message });
+        enviarLog("error", "Dashboard parcial error", { page, error: err.message });
         dashboardContent.innerHTML = "<p>Error al cargar el contenido.</p>";
       }
     });
@@ -240,17 +242,18 @@ function initDashboardTabs() {
 // Registro Empresa
 // ============================
 function initRegistroEmpresa() {
-  const form = $("#form-registro-empresa");
-  if (!form) return;
+  const formRegistro = document.getElementById("form-registro-empresa");
+  if (!formRegistro) return;
 
-  form.addEventListener("submit", async (e) => {
+  formRegistro.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const nombre = $("#nombre")?.value?.trim();
-    const email = $("#email")?.value?.trim();
-    const password = $("#password")?.value;
+
+    const nombre = document.getElementById("nombre")?.value?.trim();
+    const email = document.getElementById("email")?.value?.trim();
+    const password = document.getElementById("password")?.value;
 
     if (!nombre || !email || !password) {
-      enviarLog("warn", "Registro empresa: campos faltantes", { nombreOk: !!nombre, emailOk: !!email, passOk: !!password });
+      enviarLog("warn", "Registro empresa -> faltan campos", { nombreOk: !!nombre, emailOk: !!email, passOk: !!password });
       return alert("⚠️ Todos los campos son obligatorios");
     }
 
@@ -261,14 +264,16 @@ function initRegistroEmpresa() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nombre, email, password })
       });
+
       const data = await res.json().catch(() => ({}));
-      enviarLog("info", "Respuesta /api/empresas", { status: res.status, data });
+      enviarLog("info", "RESP /api/empresas", { status: res.status, data });
 
       if (!res.ok) return alert(`❌ ${data.error || "Error creando empresa"}`);
 
-      setEmpresaAutenticada({ _id: data._id, nombre: data.nombre, email: data.email });
+      setEmpresaAutenticada(data);
       alert("✅ Empresa registrada correctamente.");
-      $("#modal-auth") && ($("#modal-auth").style.display = "none");
+      const modal = document.getElementById("modal-auth");
+      if (modal) modal.style.display = "none";
       mostrarDashboard();
     } catch (err) {
       enviarLog("error", "Registro empresa error", { error: err.message });
@@ -281,16 +286,17 @@ function initRegistroEmpresa() {
 // Login Empresa
 // ============================
 function initLoginEmpresa() {
-  const form = $("#form-login-empresa");
-  if (!form) return;
+  const formLogin = document.getElementById("form-login-empresa");
+  if (!formLogin) return;
 
-  form.addEventListener("submit", async (e) => {
+  formLogin.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email = $("#login-email")?.value?.trim();
-    const password = $("#login-password")?.value;
+
+    const email = document.getElementById("login-email")?.value?.trim();
+    const password = document.getElementById("login-password")?.value;
 
     if (!email || !password) {
-      enviarLog("warn", "Login empresa: campos faltantes", { emailOk: !!email, passOk: !!password });
+      enviarLog("warn", "Login empresa -> faltan campos", { emailOk: !!email, passOk: !!password });
       return alert("⚠️ Email y contraseña requeridos");
     }
 
@@ -301,14 +307,16 @@ function initLoginEmpresa() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
       });
+
       const data = await res.json().catch(() => ({}));
-      enviarLog("info", "Respuesta /api/login-empresa", { status: res.status, data });
+      enviarLog("info", "RESP /api/login-empresa", { status: res.status, data });
 
       if (!res.ok) return alert(`❌ ${data.error || "Credenciales inválidas"}`);
 
-      setEmpresaAutenticada({ _id: data._id, nombre: data.nombre, email: data.email });
+      setEmpresaAutenticada(data);
       alert(`✅ Bienvenido ${data.nombre}`);
-      $("#modal-auth") && ($("#modal-auth").style.display = "none");
+      const modal = document.getElementById("modal-auth");
+      if (modal) modal.style.display = "none";
       mostrarDashboard();
     } catch (err) {
       enviarLog("error", "Login empresa error", { error: err.message });
@@ -318,38 +326,43 @@ function initLoginEmpresa() {
 }
 
 // ============================
-// Alta Empleado (Gestión) con credenciales opcionales
+// Alta Empleado (Gestión) – soporta usuario/password opcionales
 // ============================
 function initAltaEmpleado() {
-  const form = $("#form-nuevo-empleado");
-  if (!form) return;
+  const formEmpleado = document.getElementById("form-nuevo-empleado");
+  if (!formEmpleado) return;
 
-  form.addEventListener("submit", async (e) => {
+  formEmpleado.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const empresa = getEmpresaAutenticada();
-    if (!empresa?._id && !empresa?.id) {
-      enviarLog("warn", "Alta empleado sin empresa autenticada");
-      return alert("⚠️ Debes iniciar sesión como empresa.");
+
+    if (!empresaAutenticada?.id && !empresaAutenticada?._id) {
+      enviarLog("warn", "Alta empleado sin login empresa");
+      alert("⚠️ Debes estar logueado como empresa para añadir empleados.");
+      return;
     }
 
+    const form = e.target;
     const datos = {
       nombre: form.nombre?.value?.trim(),
       edad: Number(form.edad?.value),
       puesto: form.puesto?.value?.trim(),
       rango: form.rango?.value?.trim(),
-      horario: { entrada: form.entrada?.value, salida: form.salida?.value },
+      horario: {
+        entrada: form.entrada?.value,
+        salida: form.salida?.value
+      },
       rol: "empleado",
       estadoConexion: "inactivo",
       fichado: false,
       ultimoFichaje: new Date().toISOString(),
-      empresaId: empresa._id || empresa.id,
+      empresaId: empresaAutenticada._id || empresaAutenticada.id,
       // opcionales si existen en el formulario
       usuario: form.usuario?.value?.trim() || undefined,
       password: form.password?.value || undefined
     };
 
     if (!datos.nombre || !Number.isFinite(datos.edad) || !datos.puesto || !datos.rango || !datos.horario?.entrada || !datos.horario?.salida) {
-      enviarLog("warn", "Alta empleado: validación fallida", datos);
+      enviarLog("warn", "Alta empleado -> validación fallida", datos);
       return alert("⚠️ Completa todos los campos obligatorios");
     }
 
@@ -360,27 +373,29 @@ function initAltaEmpleado() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos)
       });
-      const resultado = await res.json().catch(() => ({}));
-      enviarLog("info", "Respuesta /api/empleados", { status: res.status, resultado });
 
-      const out = $("#respuesta-empleado");
+      const resultado = await res.json().catch(() => ({}));
+      enviarLog("info", "RESP /api/empleados", { status: res.status, resultado });
+
+      const out = document.getElementById("respuesta-empleado");
       if (!res.ok) {
-        if (out) out.innerText = "❌ Error: " + (resultado.error || "No se pudo crear");
+        out && (out.innerText = "❌ Error: " + (resultado.error || "No se pudo crear"));
         return;
       }
 
-      // Mostrar credenciales generadas (si el backend las devolvió)
+      // Mostrar credenciales devueltas (usuario + password temporal si las generó el backend)
       if (out) {
         const cred = [];
         if (resultado.usuario) cred.push(`Usuario: ${resultado.usuario}`);
         if (resultado.tempPassword) cred.push(`Password temporal: ${resultado.tempPassword}`);
         out.innerHTML = `✅ Empleado añadido correctamente` + (cred.length ? `<br><small>${cred.join(" — ")}</small>` : "");
       }
+
       form.reset?.();
     } catch (err) {
       enviarLog("error", "Alta empleado error", { error: err.message });
-      const out = $("#respuesta-empleado");
-      if (out) out.innerText = "❌ Error al conectar con el servidor";
+      const out = document.getElementById("respuesta-empleado");
+      out && (out.innerText = "❌ Error al conectar con el servidor");
     }
   });
 }
@@ -389,14 +404,14 @@ function initAltaEmpleado() {
 // Login Empleado + Perfil (empleados.html)
 // ============================
 function initLoginEmpleado() {
-  const form = $("#form-login-empleado");
+  const form = document.getElementById("form-login-empleado");
   if (!form) return; // no estamos en empleados.html
 
-  const dash = $("#empleado-dashboard");
-  const perfil = $("#empleado-perfil");
-  const btnLogout = $("#btn-logout-empleado");
+  const dash = document.getElementById("empleado-dashboard");
+  const perfil = document.getElementById("empleado-perfil");
+  const btnLogout = document.getElementById("btn-logout-empleado");
 
-  // Si ya hay sesión de empleado, muestra directamente
+  // Restaurar sesión empleado si existe
   const empSaved = getEmpleadoAutenticado();
   if (empSaved && dash && perfil) {
     form.classList.add("hidden");
@@ -406,11 +421,12 @@ function initLoginEmpleado() {
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const usuario = $("#emp-usuario")?.value?.trim();
-    const password = $("#emp-password")?.value;
+
+    const usuario = document.getElementById("emp-usuario")?.value?.trim();
+    const password = document.getElementById("emp-password")?.value;
 
     if (!usuario || !password) {
-      enviarLog("warn", "Login empleado: campos faltantes", { usuarioOk: !!usuario, passOk: !!password });
+      enviarLog("warn", "Login empleado -> faltan campos", { usuarioOk: !!usuario, passOk: !!password });
       return alert("⚠️ Usuario y contraseña requeridos");
     }
 
@@ -421,15 +437,16 @@ function initLoginEmpleado() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ usuario, password })
       });
+
       const emp = await res.json().catch(() => ({}));
-      enviarLog("info", "Respuesta /api/login-empleado", { status: res.status, emp });
+      enviarLog("info", "RESP /api/login-empleado", { status: res.status, emp });
 
       if (!res.ok) return alert(`❌ ${emp.error || "Credenciales inválidas"}`);
 
       setEmpleadoAutenticado(emp);
-      if (form) form.classList.add("hidden");
-      if (dash) dash.classList.remove("hidden");
-      if (perfil) perfil.innerHTML = perfilHTML(emp);
+      form.classList.add("hidden");
+      dash?.classList.remove("hidden");
+      perfil && (perfil.innerHTML = perfilHTML(emp));
     } catch (err) {
       enviarLog("error", "Login empleado error", { error: err.message });
       alert("❌ Error de red");
