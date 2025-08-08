@@ -185,24 +185,29 @@ button.btn-secondary:hover { background-color:rgba(255,255,255,.2); }
   background: #23272f; border-radius: 16px; 
 }
 
-/* grid en una sola columna (tarjeta larga) */
-.dashboard-content.empleados-mode .grid-empleados { 
-  display:grid; grid-template-columns: 1fr; gap:16px;
+/* grid: 2 por fila si hay ancho; compactas con max-content */
+.dashboard-content.empleados-mode .grid-empleados {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, max-content));
+  gap: 16px;
+  justify-content: start;   /* alinea tarjetas al inicio, no centradas */
+  align-content: start;
 }
 
-/* TARJETA */
+/* tarjeta compacta (solo lo necesario) */
 .dashboard-content .empleado-card {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 20px;
-    background: #0f172a;
-    color: #e5e7eb;
-    border: 2px solid #000;
-    border-radius: 16px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, .2);
-    width: max-content;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #0f172a;
+  color: #e5e7eb;
+  border: 2px solid #000;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, .2);
+  width: max-content;        /* ocupa lo justo */
+  max-width: 100%;           /* no se desborda en pantallas pequeñas */
 }
 
 /* dot estado */
@@ -237,6 +242,12 @@ button.btn-secondary:hover { background-color:rgba(255,255,255,.2); }
 }
 .empleado-card .emp-actions .btn:hover{
   background: rgba(255,255,255,.12);
+}
+
+@media (max-width: 820px) {
+  .dashboard-content.empleados-mode .grid-empleados {
+    grid-template-columns: 1fr;   /* una por fila en pantallas estrechas */
+  }
 }
 
 
