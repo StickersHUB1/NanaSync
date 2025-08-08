@@ -186,12 +186,11 @@ button.btn-secondary:hover { background-color:rgba(255,255,255,.2); }
 }
 
 /* grid: 2 por fila si hay ancho; compactas con max-content */
-.dashboard-content.empleados-mode .grid-empleados {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, max-content));
-  gap: 16px;
-  justify-content: start;   /* alinea tarjetas al inicio, no centradas */
-  align-content: start;
+  .dashboard-content.empleados-mode .grid-empleados {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    justify-items: center;
 }
 
 /* tarjeta compacta (solo lo necesario) */
@@ -246,11 +245,8 @@ button.btn-secondary:hover { background-color:rgba(255,255,255,.2); }
 
 @media (max-width: 820px) {
   .dashboard-content.empleados-mode .grid-empleados {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-    justify-items: center;
-}
+    grid-template-columns: 1fr;   /* una por fila en pantallas estrechas */
+  }
 }
 
 
