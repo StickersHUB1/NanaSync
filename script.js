@@ -25,7 +25,9 @@ function enviarLog(level, message, context = null) {
 let empresaAutenticada = null;
 
 function setEmpresaAutenticada(data) {
-  empresaAutenticada = data ? { id: data._id || data.id, _id: data._id || data.id, nombre: data.nombre, email: data.email } : null;
+  empresaAutenticada = data
+    ? { id: data._id || data.id, _id: data._id || data.id, nombre: data.nombre, email: data.email, displayName: data.displayName, logoUrl: data.logoUrl }
+    : null;
   localStorage.setItem("empresaAutenticada", JSON.stringify(empresaAutenticada));
   enviarLog("info", "empresaAutenticada guardada", empresaAutenticada);
 }
@@ -34,7 +36,9 @@ function restoreEmpresaAutenticada() {
     const raw = localStorage.getItem("empresaAutenticada");
     if (raw) {
       const parsed = JSON.parse(raw);
-      empresaAutenticada = parsed ? { id: parsed._id || parsed.id, _id: parsed._id || parsed.id, nombre: parsed.nombre, email: parsed.email } : null;
+      empresaAutenticada = parsed
+        ? { id: parsed._id || parsed.id, _id: parsed._id || parsed.id, nombre: parsed.nombre, email: parsed.email, displayName: parsed.displayName, logoUrl: parsed.logoUrl }
+        : null;
     }
   } catch (_) {}
 }
@@ -63,11 +67,38 @@ function clearEmpleadoAutenticado() {
 const $ = (sel, root = document) => root.querySelector(sel);
 
 // ============================
+// 3.1 Cargar perfil para pintar logo+nombre
+// ============================
+async function loadEmpresaPerfil() {
+  if (!empresaAutenticada?._id && !empresaAutenticada?.id) return;
+  const id = empresaAutenticada._id || empresaAutenticada.id;
+  try {
+    const res = await fetch(`${API_BASE}/api/empresas/${id}`);
+    if (!res.ok) throw new Error("No se pudo obtener perfil");
+    const perfil = await res.json();
+
+    // guarda en memoria y localStorage
+    setEmpresaAutenticada({ ...empresaAutenticada, ...perfil });
+
+    // pinta encabezado si existe
+    const logo = document.getElementById("empresa-logo");
+    const nombre = document.getElementById("empresa-nombre");
+    if (logo && perfil.logoUrl) logo.src = perfil.logoUrl;
+    if (nombre && (perfil.displayName || perfil.nombre)) {
+      nombre.textContent = perfil.displayName || perfil.nombre;
+    }
+  } catch (e) {
+    enviarLog("warn", "No se pudo cargar perfil empresa", { error: e.message });
+  }
+}
+
+// ============================
 // SPA
 // ============================
 document.addEventListener("DOMContentLoaded", () => {
   enviarLog("info", "DOM cargado - init");
   restoreEmpresaAutenticada();
+  if (empresaAutenticada) loadEmpresaPerfil(); // 3.3 tras restaurar sesión
 
   const links = document.querySelectorAll(".sidebar-nav a");
   const main = document.getElementById("main-content");
@@ -127,6 +158,7 @@ function inicializarComponentes() {
   initAltaEmpleado();
   initLoginEmpleado();     // empleados.html
   initEmpleadosTab();      // pestaña EMPLEADOS dentro de empresas.html
+  initAjustesEmpresa();    // 3.2 ajustes empresa
 }
 
 // ============================
@@ -279,6 +311,7 @@ function initRegistroEmpresa() {
       const modal = document.getElementById("modal-auth");
       if (modal) modal.style.display = "none";
       mostrarDashboard();
+      await loadEmpresaPerfil(); // 3.3 tras registro
     } catch (err) {
       enviarLog("error", "Registro empresa error", { error: err.message });
       alert("❌ Error de red");
@@ -322,6 +355,7 @@ function initLoginEmpresa() {
       const modal = document.getElementById("modal-auth");
       if (modal) modal.style.display = "none";
       mostrarDashboard();
+      await loadEmpresaPerfil(); // 3.3 tras login
     } catch (err) {
       enviarLog("error", "Login empresa error", { error: err.message });
       alert("❌ Error de red");
@@ -400,6 +434,55 @@ function initAltaEmpleado() {
       enviarLog("error", "Alta empleado error", { error: err.message });
       const out = document.getElementById("respuesta-empleado");
       out && (out.innerText = "❌ Error al conectar con el servidor");
+    }
+  });
+}
+
+// ============================
+// 3.2 Rellenar y guardar ajustes
+// ============================
+function initAjustesEmpresa() {
+  const form = document.getElementById("form-ajustes-empresa");
+  if (!form) return;
+
+  // Prefill
+  const nombre = document.getElementById("aj-nombre");
+  const logoUrl = document.getElementById("aj-logoUrl");
+  if (nombre) nombre.value = empresaAutenticada?.displayName || empresaAutenticada?.nombre || "";
+  if (logoUrl) logoUrl.value = empresaAutenticada?.logoUrl || "";
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!empresaAutenticada?._id && !empresaAutenticada?.id) return alert("Inicia sesión.");
+
+    const id = empresaAutenticada._id || empresaAutenticada.id;
+    const payload = {
+      displayName: nombre?.value?.trim(),
+      logoUrl: logoUrl?.value?.trim() || null
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/api/empresas/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(()=> ({}));
+      const msg = document.getElementById("ajustes-msg");
+
+      if (!res.ok) {
+        msg && (msg.style.color = "#fecaca", msg.textContent = data.error || "Error guardando");
+        return;
+      }
+
+      // refresca cache y header
+      setEmpresaAutenticada({ ...empresaAutenticada, ...payload });
+      await loadEmpresaPerfil();
+      msg && (msg.style.color = "#a7f3d0", msg.textContent = "Guardado ✅");
+    } catch (err) {
+      enviarLog("error", "PUT ajustes empresa", { error: err.message });
+      const msg = document.getElementById("ajustes-msg");
+      msg && (msg.style.color = "#fecaca", msg.textContent = "Error de red");
     }
   });
 }
