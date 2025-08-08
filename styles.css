@@ -170,3 +170,53 @@ button.btn-secondary:hover { background-color:rgba(255,255,255,.2); }
 .fila label { font-weight:bold; align-self:center; margin-right:5px; }
 .horario { justify-content:center; }
 .btn { padding:10px 20px; border:none; background-color:#4b8ce8; color:white; border-radius:10px; cursor:pointer; font-weight:bold; }
+
+/* ==== Ajustes específicos para la pestaña EMPLEADOS (empresa) ==== */
+
+/* El contenedor del dashboard no debe centrar ni poner texto verde aquí */
+.dashboard-content.empleados-mode {
+  display: block;
+  color: inherit;
+  text-align: left;
+  font-weight: 400;
+  font-size: 1rem;
+}
+
+/* Fondo/colores de la tarjeta estilo wireframe oscuro */
+.dashboard-content .empleado-card {
+  position: relative;
+  background: #0f172a;         /* gris azulado oscuro */
+  color: #e5e7eb;
+  border: 2px solid #000;
+  border-radius: 20px;
+  padding: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,.2);
+}
+
+/* Foto + estado en esquina */
+.empleado-card .foto-placeholder {
+  width: 60px; height: 60px;
+  border: 2px solid #000;
+  border-radius: 6px;
+  background: #111;
+  color: #9ca3af;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem;
+}
+.empleado-card .estado-dot {
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 2px solid #000;
+}
+
+/* Tipografía del bloque de datos */
+.empleado-card .emp-datos { margin-top: 10px; line-height: 1.25; }
+.empleado-card .emp-usuario { font-weight: 700; word-break: break-word; }
+.empleado-card .emp-meta { opacity: .85; }
+
+/* Botón Administrar */
+.empleado-card .emp-actions { margin-top: 10px; }
+
+
