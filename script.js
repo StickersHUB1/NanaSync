@@ -1,5 +1,5 @@
-// ✅ script.js – NanaSync Frontend Core
-const API_URL = "https://nanasyncbackend.onrender.com"; // 🔹 URL correcta del backend en Render
+// ✅ URL base del backend en Render
+const API_URL = "https://nanasyncbackend.onrender.com";
 
 // 📌 Helper para seleccionar elementos
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -12,7 +12,7 @@ function getEmpresaAutenticada() {
   return JSON.parse(localStorage.getItem("empresaAutenticada"));
 }
 
-// 📌 Registrar empresa
+// 📌 Registro de empresa
 const formRegistro = document.getElementById("form-registro-empresa");
 formRegistro?.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -42,7 +42,7 @@ formRegistro?.addEventListener("submit", async (e) => {
   }
 });
 
-// 📌 Login empresa
+// 📌 Login de empresa
 const formLogin = document.getElementById("form-login-empresa");
 formLogin?.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -63,7 +63,6 @@ formLogin?.addEventListener("submit", async (e) => {
       return;
     }
 
-    // Guarda empresa en localStorage y muestra dashboard
     setEmpresaAutenticada(data);
     alert(`✅ Bienvenido ${data.nombre}`);
     mostrarDashboard();
@@ -133,5 +132,48 @@ formEmpleado?.addEventListener("submit", async (e) => {
   } catch (err) {
     console.error("Error registrando empleado:", err);
     alert("❌ Error de red");
+  }
+});
+
+// ======================================================
+// 🔹 LÓGICA DE NAVEGACIÓN DEL SIDEBAR (manteniendo tu flujo SPA)
+// ======================================================
+document.addEventListener("DOMContentLoaded", () => {
+  const links = document.querySelectorAll(".sidebar-nav a");
+  const main = document.getElementById("main-content");
+
+  const isLoggedIn = () => localStorage.getItem("empresaActiva") === "true";
+  const setLoggedIn = () => localStorage.setItem("empresaActiva", "true");
+  const logout = () => localStorage.removeItem("empresaActiva");
+
+  const cargarPagina = async (url) => {
+    try {
+      const res = await fetch(url);
+      const html = await res.text();
+      main.innerHTML = html;
+
+      if (url.includes("empresas.html") && isLoggedIn()) {
+        mostrarDashboard();
+      }
+    } catch (err) {
+      console.error("Error cargando página:", err);
+      main.innerHTML = "<p>Error cargando contenido.</p>";
+    }
+  };
+
+  links.forEach((link) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const page = link.getAttribute("data-page");
+      if (page) {
+        cargarPagina(page);
+      }
+    });
+  });
+
+  // Cargar página inicial
+  const firstPage = links[0]?.getAttribute("data-page");
+  if (firstPage) {
+    cargarPagina(firstPage);
   }
 });
