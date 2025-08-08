@@ -175,100 +175,67 @@ button.btn-secondary:hover { background-color:rgba(255,255,255,.2); }
 
 /* ==== Ajustes específicos para la pestaña EMPLEADOS (empresa) ==== */
 
-/* El contenedor del dashboard no debe centrar ni poner texto verde aquí */
-.dashboard-content.empleados-mode {
-  display: block;
-  color: inherit;
-  text-align: left;
-  font-weight: 400;
-  font-size: 1rem;
+/* === TARGET VISUAL: tarjeta horizontal como la captura === */
+.dashboard-content.empleados-mode { 
+  display:block; color:inherit; text-align:left; font-weight:400; font-size:1rem;
 }
 
-/* Fondo/colores de la tarjeta estilo wireframe oscuro */
-.dashboard-content .empleado-card {
-  position: relative;
-  background: #0f172a;         /* gris azulado oscuro */
-  color: #e5e7eb;
-  border: 2px solid #000;
-  border-radius: 20px;
-  padding: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,.2);
+/* Caja del listado (la gris interior) */
+.empleados-tab .glass-box { 
+  background: #23272f; border-radius: 16px; 
 }
 
-/* Foto + estado en esquina */
-.empleado-card .foto-placeholder {
-  width: 60px; height: 60px;
-  border: 2px solid #000;
-  border-radius: 6px;
-  background: #111;
-  color: #9ca3af;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .75rem;
-}
-.empleado-card .estado-dot {
-  position: absolute;
-  top: 10px; right: 10px;
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  border: 2px solid #000;
+/* grid en una sola columna (tarjeta larga) */
+.dashboard-content.empleados-mode .grid-empleados { 
+  display:grid; grid-template-columns: 1fr; gap:16px;
 }
 
-/* Tipografía del bloque de datos */
-.empleado-card .emp-datos { margin-top: 10px; line-height: 1.25; }
-.empleado-card .emp-usuario { font-weight: 700; word-break: break-word; }
-.empleado-card .emp-meta { opacity: .85; }
-
-/* Botón Administrar */
-.empleado-card .emp-actions { margin-top: 10px; }
-
-/* ===== EMPLEADOS (tab empresa) - layout horizontal ===== */
-.dashboard-content.empleados-mode .grid-empleados{
-  grid-template-columns: 1fr; /* una columna, tarjeta larga */
-}
-
+/* TARJETA */
 .dashboard-content .empleado-card{
   position: relative;
-  display: flex;
-  align-items: center;
-  gap: 16px;
+  display: flex; align-items: center; gap:16px;
   padding: 16px 20px;
-  background: #0f172a;
+  background: #0f1b2d;              /* azul muy oscuro */
   color: #e5e7eb;
-  border: 2px solid #000;
-  border-radius: 16px;
-  box-shadow: 0 4px 6px rgba(0,0,0,.2);
+  border: 2px solid #0b0f16;        /* borde oscuro visible */
+  border-radius: 18px;
+  box-shadow: 0 6px 10px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);
 }
 
+/* dot estado */
 .empleado-card .estado-dot{
-  position: absolute;
-  top: 10px; right: 10px;
-  width: 10px; height: 10px;
-  border-radius: 50%;
+  position:absolute; top:10px; right:10px;
+  width:10px; height:10px; border-radius:50%;
   border: 2px solid #000;
 }
 
+/* foto */
 .empleado-card .foto-placeholder{
-  width: 64px; height: 64px;
-  border: 2px solid #000;
-  border-radius: 8px;
-  background: #111;
-  color: #9ca3af;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .75rem; min-width: 64px;
+  width:64px; height:64px; min-width:64px;
+  border:2px solid #000; border-radius:10px;
+  background:#151922; color:#a6adbb;
+  display:flex; align-items:center; justify-content:center; font-size:.75rem;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
 }
 
-.empleado-card .emp-datos{
-  line-height: 1.25;
-}
-.empleado-card .emp-usuario{ font-weight: 700; margin-bottom: 2px; }
-.empleado-card .emp-meta{ opacity: .85; }
+/* textos */
+.empleado-card .emp-datos{ line-height:1.25; }
+.empleado-card .emp-usuario{ font-weight:700; margin-bottom:2px; color:#cfe1ff; }
+.empleado-card .emp-meta{ opacity:.85; }
 
-.empleado-card .emp-spacer{ flex: 1; } /* empuja el botón a la derecha */
-
+/* botón a la derecha */
+.empleado-card .emp-spacer{ flex:1; }
 .empleado-card .emp-actions .btn{
-  padding: 8px 16px;
+  padding: 10px 18px;
   border-radius: 10px;
   font-weight: 700;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.15);
 }
+.empleado-card .emp-actions .btn:hover{
+  background: rgba(255,255,255,.12);
+}
+
+
 
 
