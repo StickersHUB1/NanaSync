@@ -468,3 +468,117 @@ function initLoginEmpleado() {
     `;
   }
 }
+
+// === EMPLEADOS (pestaña dentro de empresas.html) ===
+async function initEmpleadosTab() {
+  const grid = document.getElementById("emp-grid");
+  if (!grid) return; // no estamos en el parcial
+
+  const qInput = document.getElementById("emp-q");
+  const btnRefresh = document.getElementById("emp-refresh");
+  const summary = document.getElementById("emp-summary");
+  const empty = document.getElementById("emp-empty");
+
+  const empresa = (window.empresaAutenticada && (window.empresaAutenticada._id || window.empresaAutenticada.id))
+    || (JSON.parse(localStorage.getItem("empresaAutenticada") || "null")?._id
+        || JSON.parse(localStorage.getItem("empresaAutenticada") || "null")?.id);
+
+  if (!empresa) {
+    grid.innerHTML = "";
+    if (empty) {
+      empty.classList.remove("hidden");
+      empty.textContent = "Inicia sesión como empresa para ver la plantilla.";
+    }
+    return;
+  }
+
+  let page = 1;
+  const limit = 50;
+
+  const fetchAndRender = async () => {
+    try {
+      const q = (qInput?.value || "").trim();
+      const url = new URL(`${API_BASE}/api/empleados`);
+      url.searchParams.set("empresaId", empresa);
+      url.searchParams.set("page", String(page));
+      url.searchParams.set("limit", String(limit));
+      if (q) url.searchParams.set("q", q);
+
+      enviarLog("info", "GET /api/empleados", {empresaId: empresa, q, page, limit});
+      const res = await fetch(url.toString());
+      const data = await res.json();
+
+      if (!res.ok) {
+        grid.innerHTML = "";
+        if (empty) {
+          empty.classList.remove("hidden");
+          empty.textContent = "Error cargando empleados.";
+        }
+        return;
+      }
+
+      const items = Array.isArray(data.items) ? data.items : Array.isArray(data) ? data : [];
+      if (summary) {
+        const total = data.total ?? items.length;
+        summary.textContent = `Total: ${total}${data.page ? ` · Página ${data.page}` : ""}`;
+      }
+
+      if (!items.length) {
+        grid.innerHTML = "";
+        empty?.classList.remove("hidden");
+        return;
+      }
+
+      empty?.classList.add("hidden");
+      grid.innerHTML = items.map(cardEmpleadoHTML).join("");
+    } catch (err) {
+      enviarLog("error", "Listar empleados error", { error: err.message });
+      grid.innerHTML = "";
+      if (empty) {
+        empty.classList.remove("hidden");
+        empty.textContent = "No se pudo cargar la lista.";
+      }
+    }
+  };
+
+  const cardEmpleadoHTML = (emp) => {
+    const on = `<span class="estado" style="background:#22c55e;"></span>`;
+    const off = `<span class="estado" style="background:#ef4444;"></span>`;
+    const estado = (String(emp.estadoConexion || "").toLowerCase() === "activo") ? on : off;
+
+    const entrada = emp?.horario?.entrada || "--:--";
+    const salida = emp?.horario?.salida || "--:--";
+
+    return `
+      <div class="empleado-card" style="background:#0f172a;color:#e5e7eb;border:2px solid #000;border-radius:20px;padding:12px;position:relative;">
+        <div class="estado-header">
+          <div class="foto-placeholder" style="background:#111;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:.8rem;">Foto</div>
+          ${estado}
+        </div>
+        <div style="margin-top:10px;line-height:1.3;">
+          <div style="font-weight:700;">${(emp.usuario || "").toLowerCase()}</div>
+          <div>${emp.puesto || "-"}</div>
+          <div style="opacity:.8;">${emp.rango || "-"}</div>
+          <div style="opacity:.8;">H: ${entrada} - ${salida}</div>
+        </div>
+        <div style="margin-top:10px;">
+          <button class="btn btn-secondary" data-admin="${emp._id}">Administrar</button>
+        </div>
+      </div>
+    `;
+  };
+
+  // Eventos
+  qInput?.addEventListener("input", debounce(fetchAndRender, 250));
+  btnRefresh?.addEventListener("click", fetchAndRender);
+
+  // Primera carga
+  fetchAndRender();
+}
+
+// Debounce utilitario
+function debounce(fn, ms=300){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+
+// ⚠️ Asegúrate de llamar a initEmpleadosTab() dentro de inicializarComponentes()
+
+
