@@ -31,7 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
           if (!response.ok) throw new Error("No se pudo cargar la página.");
           const html = await response.text();
           main.innerHTML = html;
+
+          // 🔹 Siempre reinicializamos modales y formularios
           inicializarComponentes();
+
           if (page === "empresas.html" && empresaAutenticada) mostrarDashboard();
           main.scrollTo(0, 0);
         } catch (err) {
@@ -43,10 +46,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const inicializarComponentes = () => {
-    initModalesAuth();
+    initModalesAuth(); // 🔹 Esto ahora se llama siempre que cargamos HTML
     initDashboard();
 
-    // Registro
+    // Registro empresa
     const formRegistro = document.getElementById("form-registro-empresa");
     formRegistro?.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -78,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Login
+    // Login empresa
     const formLogin = document.getElementById("form-login-empresa");
     formLogin?.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -175,27 +178,31 @@ document.addEventListener("DOMContentLoaded", () => {
     const formRegistro = document.getElementById("form-registro-empresa");
     const formLogin = document.getElementById("form-login-empresa");
 
-    if (modal && btnOpenRegistro && btnOpenLogin && btnCloseModal && formRegistro && formLogin) {
-      btnOpenRegistro.addEventListener("click", () => {
+    if (!modal) return;
+
+    if (btnOpenRegistro) {
+      btnOpenRegistro.onclick = () => {
         enviarLog("info", "Abriendo modal registro");
         modal.style.display = "flex";
         formRegistro.style.display = "flex";
         formLogin.style.display = "none";
-      });
-
-      btnOpenLogin.addEventListener("click", () => {
+      };
+    }
+    if (btnOpenLogin) {
+      btnOpenLogin.onclick = () => {
         enviarLog("info", "Abriendo modal login");
         modal.style.display = "flex";
         formLogin.style.display = "flex";
         formRegistro.style.display = "none";
-      });
-
-      btnCloseModal.addEventListener("click", () => {
+      };
+    }
+    if (btnCloseModal) {
+      btnCloseModal.onclick = () => {
         enviarLog("info", "Cerrando modal auth");
         modal.style.display = "none";
         formLogin.style.display = "none";
         formRegistro.style.display = "none";
-      });
+      };
     }
   };
 
@@ -216,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (!response.ok) throw new Error("No se pudo cargar la página.");
           const html = await response.text();
           dashboardContent.innerHTML = html;
-          inicializarComponentes();
+          inicializarComponentes(); // 🔹 Esto recarga modales también
         } catch (err) {
           enviarLog("error", "Error al cargar contenido dashboard", { error: err.message });
           dashboardContent.innerHTML = "<p>Error al cargar el contenido.</p>";
@@ -226,5 +233,5 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   activarNavegacion();
-  inicializarComponentes();
+  inicializarComponentes(); // 🔹 Llamada inicial para que modales funcionen desde el inicio
 });
