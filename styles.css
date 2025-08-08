@@ -169,7 +169,9 @@ button.btn-secondary:hover { background-color:rgba(255,255,255,.2); }
 .fila input { flex:1; padding:8px 10px; border-radius:8px; border:1px solid #ccc; min-width:120px; }
 .fila label { font-weight:bold; align-self:center; margin-right:5px; }
 .horario { justify-content:center; }
-.btn { padding:10px 20px; border:none; background-color:#4b8ce8; color:white; border-radius:10px; cursor:pointer; font-weight:bold; }
+/* Limita el estilo azul SOLO al formulario de gestión */
+.gestion-container .btn { padding: 10px 20px; border: none; background-color: #4b8ce8; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; }
+
 
 /* ==== Ajustes específicos para la pestaña EMPLEADOS (empresa) ==== */
 
@@ -218,3 +220,55 @@ button.btn-secondary:hover { background-color:rgba(255,255,255,.2); }
 
 /* Botón Administrar */
 .empleado-card .emp-actions { margin-top: 10px; }
+
+/* ===== EMPLEADOS (tab empresa) - layout horizontal ===== */
+.dashboard-content.empleados-mode .grid-empleados{
+  grid-template-columns: 1fr; /* una columna, tarjeta larga */
+}
+
+.dashboard-content .empleado-card{
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #0f172a;
+  color: #e5e7eb;
+  border: 2px solid #000;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0,0,0,.2);
+}
+
+.empleado-card .estado-dot{
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid #000;
+}
+
+.empleado-card .foto-placeholder{
+  width: 64px; height: 64px;
+  border: 2px solid #000;
+  border-radius: 8px;
+  background: #111;
+  color: #9ca3af;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem; min-width: 64px;
+}
+
+.empleado-card .emp-datos{
+  line-height: 1.25;
+}
+.empleado-card .emp-usuario{ font-weight: 700; margin-bottom: 2px; }
+.empleado-card .emp-meta{ opacity: .85; }
+
+.empleado-card .emp-spacer{ flex: 1; } /* empuja el botón a la derecha */
+
+.empleado-card .emp-actions .btn{
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+
